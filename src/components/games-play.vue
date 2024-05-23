@@ -1,7 +1,7 @@
 <template>
   <div class="q-pa-md text-warning">
-    <div class="row justify-center text-h4 text-bold">GAMES WE PLAY:</div>
-    <div class="q-pa-md row justify-center q-gutter-md">
+    <div class="row justify-center text-h5 text-bold">GAMES WE PLAY:</div>
+    <div class="q-pa-sm justify-center row q-gutter-md">
       <q-card
         class="my-card inset-shadow animation1"
         v-for="game in games"
@@ -9,18 +9,9 @@
       >
         <q-img :src="game.link">
           <div
-            class="absolute-top text-center game-name text-h7 text-warning q-gutter-sm"
+            class="absolute-top text-center game-name text-h7 text-warning q-gutter-sm q-pa-none"
           >
             {{ game.name }}
-          </div>
-          <div class="q-gutter-md text-center absolute-bottom try-me">
-            <q-btn
-              color="warning"
-              label="Tournament"
-              class="text-black"
-              size="sm"
-            />
-            <q-btn color="accent" label="Rankings" size="sm" />
           </div>
         </q-img>
       </q-card>
@@ -87,8 +78,8 @@ const games = [
 
 <style lang="scss" scoped>
 .my-card {
-  height: 150px;
-  width: 268px;
+  height: 115px;
+  width: 205px;
 
   transition: height 0.5s, width 0.5s;
 }

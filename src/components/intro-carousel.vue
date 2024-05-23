@@ -4,13 +4,12 @@
       class="text-warning rounded-borders"
       animated
       v-model="slide"
-      arrows
       infinite
       swipeable
       autoplay
       transition-prev="slide-right"
       transition-next="slide-left"
-      height="400px"
+      height="350px"
     >
       <q-carousel-slide
         v-for="intro in intros"
@@ -27,7 +26,7 @@
             <div class="text-h4 text-bold">{{ intro.title }}</div>
             <br />
 
-            <div class="text-h6 justify-center text-center animation1">
+            <div class="text-h7 justify-center text-center animation1">
               {{ intro.caption1 }} <br />
               {{ intro.caption2 }}
               <br />

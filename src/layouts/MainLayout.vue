@@ -4,10 +4,10 @@
       <q-toolbar class="text-warning justify-between">
         <q-avatar size="45px"><img src="images/logo-1.png" /></q-avatar>
         <q-tabs>
-          <q-tab label="Play Now" />
           <q-tab label="Tournament" />
           <q-tab label="Rankings" />
-          <q-tab label="Login" />
+
+          <q-tab label="Play" />
         </q-tabs>
       </q-toolbar>
     </q-header>
