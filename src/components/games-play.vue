@@ -48,7 +48,7 @@ const games = [
   },
   {
     name: "Mobile Legends: Bang Bang",
-    link: "images/ml.png",
+    link: "images/mobile.png",
   },
   {
     name: "Call of Duty Mobile",
