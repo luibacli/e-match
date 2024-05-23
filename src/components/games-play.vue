@@ -8,12 +8,19 @@
         :key="game.name"
       >
         <q-img :src="game.link">
-          <div class="absolute-top text-center game-name text-h6">
+          <div
+            class="absolute-top text-center game-name text-h7 text-warning q-gutter-sm"
+          >
             {{ game.name }}
           </div>
           <div class="q-gutter-md text-center absolute-bottom try-me">
-            <q-btn color="warning" label="Tournament" class="text-black" />
-            <q-btn color="accent" label="Rankings" />
+            <q-btn
+              color="warning"
+              label="Tournament"
+              class="text-black"
+              size="sm"
+            />
+            <q-btn color="accent" label="Rankings" size="sm" />
           </div>
         </q-img>
       </q-card>
@@ -41,11 +48,11 @@ const games = [
   },
   {
     name: "Mobile Legends: Bang Bang",
-    link: "images/ml.jpg",
+    link: "images/ml.png",
   },
   {
     name: "Call of Duty Mobile",
-    link: "images/cod.jpg",
+    link: "images/codm.png",
   },
   {
     name: "Crossfire",
@@ -55,21 +62,39 @@ const games = [
     name: "Valorant",
     link: "images/valorant.jpg",
   },
+  {
+    name: "Arena of Valor",
+    link: "images/aov.png",
+  },
+  {
+    name: "Apex Legends",
+    link: "images/apex.png",
+  },
+  {
+    name: "PUBG: Mobile",
+    link: "images/pubg.png",
+  },
+  {
+    name: "Fortnite",
+    link: "images/fortnite.png",
+  },
+  {
+    name: "Rocket League",
+    link: "images/rocket.png",
+  },
 ];
 </script>
 
 <style lang="scss" scoped>
 .my-card {
-  height: 100px;
-  width: 400px;
-  margin-bottom: 125px;
+  height: 150px;
+  width: 268px;
+
   transition: height 0.5s, width 0.5s;
 }
 
 .my-card:hover {
   cursor: pointer;
-  height: 105px;
-  width: 410px;
 }
 
 .try-me {
