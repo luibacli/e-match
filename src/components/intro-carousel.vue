@@ -5,13 +5,12 @@
       animated
       v-model="slide"
       arrows
-      navigation
       infinite
       swipeable
       autoplay
       transition-prev="slide-right"
       transition-next="slide-left"
-      height="500px"
+      height="400px"
     >
       <q-carousel-slide
         v-for="intro in intros"
@@ -25,10 +24,10 @@
           style="background-color: rgba(0, 0, 0, 0.6)"
         >
           <div class="custom-caption animation2">
-            <div class="text-h3 text-bold">{{ intro.title }}</div>
+            <div class="text-h4 text-bold">{{ intro.title }}</div>
             <br />
 
-            <div class="text-h5 justify-center text-center animation1">
+            <div class="text-h6 justify-center text-center animation1">
               {{ intro.caption1 }} <br />
               {{ intro.caption2 }}
               <br />

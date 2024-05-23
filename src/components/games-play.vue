@@ -1,7 +1,7 @@
 <template>
   <div class="q-pa-md text-warning">
     <div class="row justify-center text-h4 text-bold">GAMES WE PLAY:</div>
-    <div class="q-pa-md row justify-center q-gutter-lg">
+    <div class="q-pa-md row justify-center q-gutter-md">
       <q-card
         class="my-card inset-shadow animation1"
         v-for="game in games"
@@ -61,15 +61,15 @@ const games = [
 <style lang="scss" scoped>
 .my-card {
   height: 100px;
-  width: 445px;
-  margin-bottom: 155px;
+  width: 400px;
+  margin-bottom: 125px;
   transition: height 0.5s, width 0.5s;
 }
 
 .my-card:hover {
   cursor: pointer;
-  height: 110px;
-  width: 455px;
+  height: 105px;
+  width: 410px;
 }
 
 .try-me {
