@@ -2,12 +2,15 @@
   <q-layout view="lHh Lpr lFf" style="background-color: #363062">
     <q-header elevated>
       <q-toolbar class="text-warning justify-between">
-        <q-avatar size="45px"><img src="images/logo-1.png" /></q-avatar>
-        <q-tabs>
-          <q-tab label="Tournament" />
-          <q-tab label="Rankings" />
+        <q-btn flat @click="this.$router.push('/')">
+          <q-avatar size="45px"><img src="images/logo-1.png" /></q-avatar
+        ></q-btn>
 
-          <q-tab label="Play" />
+        <q-tabs>
+          <q-tab label="Play" @click="this.$router.push('/play')" />
+          <q-tab label="Ranks" @click="this.$router.push('/ranks')" />
+
+          <q-tab label="Login" />
         </q-tabs>
       </q-toolbar>
     </q-header>
@@ -21,6 +24,7 @@
 <script setup>
 import { ref } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
+import router from "src/router";
 
 defineOptions({
   name: "MainLayout",
