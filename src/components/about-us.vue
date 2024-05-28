@@ -1,6 +1,9 @@
 <template>
   <div class="q-pa-none text-warning">
-    <q-parallax src="images/background-5.png" style="height: 200px">
+    <q-parallax
+      src="https://firebasestorage.googleapis.com/v0/b/ematch-dev.appspot.com/o/images%2Fbackground-5.png?alt=media&token=b5541e70-7e0f-48ca-b7f0-6706e418b985/background-5.png"
+      style="height: 200px"
+    >
       <div class="text-h4 text-bold text-center absolute-top q-mt-lg">
         Start Your Journey Now!
       </div>
@@ -44,7 +47,10 @@
     </div>
   </div>
   <div class="q-pa-none text-warning">
-    <q-parallax src="images/background-7.png" style="height: 200px">
+    <q-parallax
+      src="https://firebasestorage.googleapis.com/v0/b/ematch-dev.appspot.com/o/images%2Fbackground-7.png?alt=media&token=41d4c05f-5764-4167-8892-08cad04e2291/background-7.png"
+      style="height: 200px"
+    >
       <div class="text-h4 text-bold text-center absolute-top q-mt-lg">
         Create Your Own Tournament!
       </div>

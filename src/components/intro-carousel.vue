@@ -57,7 +57,7 @@ const slide = ref(1);
 const intros = ref([
   {
     id: 1,
-    link: "images/background-1.png",
+    link: "https://firebasestorage.googleapis.com/v0/b/ematch-dev.appspot.com/o/images%2Fbackground-1.png?alt=media&token=e1e30765-6d26-4da9-b86d-71ed04f0df18",
     title: "WELCOME TO e-match!",
     caption1: " The ultimate destination for e-sports enthusiasts.",
     caption2:
@@ -66,7 +66,7 @@ const intros = ref([
   },
   {
     id: 2,
-    link: "images/background-2.png",
+    link: "https://firebasestorage.googleapis.com/v0/b/ematch-dev.appspot.com/o/images%2Fbackground-2.png?alt=media&token=683fb976-586e-4510-8b6e-ed171981428a",
     title: "BECOME THE NEXT CHAMPION!",
     caption1: "Whether you're a casual player or a seasoned pro,",
     caption2:
@@ -75,7 +75,7 @@ const intros = ref([
   },
   {
     id: 3,
-    link: "images/background-3.png",
+    link: "https://firebasestorage.googleapis.com/v0/b/ematch-dev.appspot.com/o/images%2Fbackground-3.png?alt=media&token=83eba270-7a97-4fe9-8e56-e0a4efeaa434",
     title: "FAIR-PLAY MATCHES",
     caption1: "Where integrity and sportsmanship take center stage,",
     caption2:
@@ -84,7 +84,7 @@ const intros = ref([
   },
   {
     id: 4,
-    link: "images/background-6.png",
+    link: "https://firebasestorage.googleapis.com/v0/b/ematch-dev.appspot.com/o/images%2Fbackground-6.png?alt=media&token=4eebc2d8-191e-4390-82a6-7595598c94cc",
     title: "PROMOTES LOCAL PLAYERS",
     caption1: "Our unique platform shines a spotlight on local players",
     caption2:
