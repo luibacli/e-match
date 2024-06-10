@@ -18,17 +18,17 @@
       </div>
     </q-parallax>
   </div>
-  <div class="q-pa-md text-warning row justify-left text-left">
+  <div class="q-pa-lg text-warning row text-left">
     <div class="text-h5 text-bold q-mt-lg">
       Compete Anytime: Join E-Match's Daily, Weekly, and Seasonal Tournaments!
     </div>
     <div class="text-h7 q-mt-lg q-mb-lg">
       Join E-Match and dive into our exciting daily, weekly, and seasonal
-      tournaments! Whether you’re looking for quick daily challenges,
+      tournaments! Whether you are looking for quick daily challenges,
       competitive weekly battles, or intense seasonal leagues, E-Match has
       something for every gamer. Test your skills, climb the leaderboards, and
       win amazing rewards as you compete against players from around the world.
-      Don’t miss out on the action—register now and become part of the E-Match
+      Do not miss out on the action—register now and become part of the E-Match
       tournament excitement!
     </div>
     <div class="text-h5 text-bold q-mt-lg">

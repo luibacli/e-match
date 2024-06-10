@@ -9,7 +9,7 @@
       >
         <q-img :src="game.link">
           <div
-            class="absolute-top text-center game-name text-h7 text-warning q-gutter-sm q-pa-none"
+            class="absolute-top text-center game-name text-h6s text-warning q-gutter-sm q-pa-none"
           >
             {{ game.name }}
           </div>
@@ -90,8 +90,9 @@ const games = [
 
 <style lang="scss" scoped>
 .my-card {
-  height: 115px;
-  width: 205px;
+  width: 100%;
+  height: 100%;
+  max-width: 300px;
 
   transition: height 0.5s, width 0.5s;
 }
