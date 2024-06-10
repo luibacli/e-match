@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Hello This Is Rank!!!!!!!</h1>
+    <h1>Rank Feature is under construction</h1>
   </div>
 </template>
 

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Hello This Is Play!!!!!!!</h1>
+    <h1>Play feature is on construction</h1>
   </div>
 </template>
 
