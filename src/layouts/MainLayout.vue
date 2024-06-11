@@ -2,13 +2,13 @@
   <q-layout view="lHh Lpr lFf" style="background-color: #363062">
     <q-header elevated>
       <q-toolbar class="text-warning justify-between">
-        <q-btn flat @click="this.$router.push('/')">
+        <q-btn flat :to="'/'">
           <q-avatar size="45px"><img src="images/logo-1.png" /></q-avatar
         ></q-btn>
 
         <q-tabs>
-          <q-tab label="Play" @click="this.$router.push('/play')" />
-          <q-tab label="Ranks" @click="this.$router.push('/ranks')" />
+          <q-route-tab label="Play" :to="'/play'" />
+          <q-route-tab label="Ranks" :to="'/ranks'" />
 
           <q-tab label="Login" @click="showLoginDialog = true" />
         </q-tabs>

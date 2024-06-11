@@ -1,9 +1,9 @@
 <template>
-  <div class="q-pa-md text-warning">
-    <div class="row justify-center text-h5 text-bold">GAMES WE PLAY:</div>
+  <div class="q-pa-sm text-warning">
+    <div class="row justify-center text-h5 text-bold">Select Games to Play</div>
     <div class="q-pa-sm justify-center row q-gutter-md">
       <q-card
-        class="my-card inset-shadow animation1"
+        class="my-card inset-shadow"
         v-for="game in games"
         :key="game.name"
       >
@@ -21,7 +21,7 @@
 
 <script setup>
 defineOptions({
-  name: "GamesPlay",
+  name: "GameCards",
 });
 
 const games = [
@@ -80,7 +80,7 @@ const games = [
 .my-card {
   width: 100%;
   height: 100%;
-  max-width: 300px;
+  max-width: 130px;
 
   transition: height 0.5s, width 0.5s;
 }
@@ -91,23 +91,5 @@ const games = [
 
 .try-me {
   display: none;
-}
-
-.game-name:hover + .try-me {
-  -webkit-animation: fadeInUp 0.2s ease-in 200ms both;
-  animation: fadeInUp 0.2s ease-in 200ms both;
-  display: block;
-}
-
-.game-name + .try-me {
-  -webkit-animation: fadeOutDown 0.2s ease-in 2s both;
-  animation: fadeOutDown 0.2s ease-in 2s both;
-  display: block; /* Ensures the element is displayed even when not hovered */
-  opacity: 0; /* Start with opacity 0 to ensure fadeOut effect is noticeable */
-}
-
-.animation1 {
-  -webkit-animation: fadeInRight 1s ease-in 800ms both;
-  animation: fadeInRight 1s ease-in 800ms both;
 }
 </style>
