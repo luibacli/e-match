@@ -9,8 +9,38 @@
         <q-tabs>
           <q-route-tab label="Play" :to="'/play'" />
           <q-route-tab label="Ranks" :to="'/ranks'" />
+          <q-tab
+            v-if="!isAuthenticated"
+            label="Login"
+            @click="showLoginDialog = true"
+          />
+          <!-- <q-avatar class="bg-secondary" icon="person" /> -->
+          <q-btn-dropdown
+            v-if="isAuthenticated"
+            flat
+            dense
+            class="text-warning"
+            :label="profileName"
+            ><q-list class="bg-primary text-warning">
+              <q-item clickable v-close-popup @click="onItemClick">
+                <q-item-section>
+                  <q-item-label>Profile</q-item-label>
+                </q-item-section>
+              </q-item>
 
-          <q-tab label="Login" @click="showLoginDialog = true" />
+              <q-item clickable v-close-popup @click="store.logout">
+                <q-item-section>
+                  <q-item-label>Logout</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item clickable v-close-popup @click="onItemClick">
+                <q-item-section>
+                  <q-item-label>Articles</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list></q-btn-dropdown
+          >
         </q-tabs>
       </q-toolbar>
     </q-header>
@@ -29,6 +59,11 @@
 <script setup>
 import { ref } from "vue";
 import LoginDialog from "src/components/LoginDialog.vue";
+import { storeToRefs } from "pinia";
+import { useAuthStore } from "src/stores/authStore";
+const store = useAuthStore();
+
+const { isAuthenticated, profileName } = storeToRefs(store);
 
 defineOptions({
   name: "MainLayout",

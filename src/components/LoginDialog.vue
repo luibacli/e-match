@@ -20,6 +20,7 @@
             <q-input
               dense
               filled
+              v-model="formData.email"
               label="Phone / Email"
               class="bg-warning"
               style="border-radius: 12px"
@@ -28,6 +29,7 @@
             <q-input
               dense
               filled
+              v-model="formData.password"
               label="Password"
               class="bg-warning"
               style="border-radius: 12px"
@@ -41,6 +43,7 @@
             </div>
             <div class="col-12 text-center">
               <q-btn
+                @click="store.loginEmailPassword"
                 label="Signin"
                 class="bg-warning"
                 rounded
@@ -69,7 +72,26 @@
             <q-input
               dense
               filled
-              label="Phone / Email"
+              v-model="registerForm.displayName"
+              label="IGN"
+              class="bg-warning"
+              style="border-radius: 12px"
+            />
+            <q-input
+              dense
+              filled
+              type="email"
+              label="Email"
+              v-model="registerForm.email"
+              class="bg-warning"
+              style="border-radius: 12px"
+            />
+            <q-input
+              dense
+              filled
+              type="number"
+              label="Phone"
+              v-model="registerForm.phoneNumber"
               class="bg-warning"
               style="border-radius: 12px"
             />
@@ -77,7 +99,9 @@
             <q-input
               dense
               filled
+              type="password"
               label="Password"
+              v-model="registerForm.password"
               class="bg-warning"
               style="border-radius: 12px"
             />
@@ -85,13 +109,16 @@
             <q-input
               dense
               filled
+              type="password"
               label="Confirm Password"
+              v-model="registerForm.confirmPassword"
               class="bg-warning"
               style="border-radius: 12px"
             />
 
             <div class="col-12 text-center q-mt-xl">
               <q-btn
+                @click="store.createAccount"
                 label="Register"
                 class="bg-warning"
                 rounded
@@ -120,26 +147,32 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from "vue";
-
+import { computed, onMounted, ref, watch } from "vue";
 import { defineProps, defineEmits } from "vue";
+import { storeToRefs } from "pinia";
+import { useAuthStore } from "src/stores/authStore";
 
-defineOptions({
-  name: "LoginDialog",
-});
+const store = useAuthStore();
+
+const { formData, registerForm } = storeToRefs(store);
 
 const props = defineProps({
   modelValue: {
     type: Boolean,
   },
-  signup: {
+  isLogin: {
     type: Boolean,
   },
 });
 
 const tab = ref("one");
 
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits([
+  "update:modelValue",
+  "update:isLogin",
+  "update:email",
+  "update:password",
+]);
 
 const model = computed({
   get() {
@@ -147,6 +180,15 @@ const model = computed({
   },
   set(newValue) {
     emit("update:modelValue", newValue);
+  },
+});
+
+const isLogin = computed({
+  get() {
+    return props.isLogin;
+  },
+  set(newValue) {
+    emit("update:isLogin", newValue);
   },
 });
 </script>
