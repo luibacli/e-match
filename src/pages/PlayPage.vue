@@ -4,7 +4,7 @@
     <CreateMatch :isOpen="isOpen" @update:isOpen="isOpen = $event" />
 
     <div class="q-pa-md row justify-center">
-      <q-btn class="bg-warning" label="Create Match" @click="isOpen = true" />
+      <q-btn class="bg-warning" label="Create Match" @click="store.openModal" />
     </div>
     <div class="bg-primary text-warning">
       <q-tabs>
@@ -13,7 +13,8 @@
         <q-tab label="Tournament" style="width: 100%" />
       </q-tabs>
     </div>
-    <div class="q-mt-md">
+    <div v-if="tableLoading">Loading....</div>
+    <div v-else class="q-mt-md">
       <q-table
         class="bg-primary text-warning"
         dense
@@ -22,6 +23,8 @@
         separator="cell"
       ></q-table>
     </div>
+    <q-btn class="bg-warning" label="test" @click="store.getMatches" />
+    <q-btn class="bg-warning" label="dota2" @click="store.getDota2" />
   </div>
 </template>
 
@@ -33,12 +36,11 @@ import { useMatchStore } from "src/stores/matchStore";
 import { storeToRefs } from "pinia";
 const store = useMatchStore();
 
-const { matchList, matchColumns } = storeToRefs(store);
-const isOpen = ref(false);
+const { matchList, matchColumns, tableLoading, isOpen } = storeToRefs(store);
 
-onMounted(() => {
-  store.getMatches();
-});
+// onMounted(() => {
+//   store.getDota2();
+// });
 </script>
 
 <style lang="scss" scoped></style>

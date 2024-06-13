@@ -8,6 +8,8 @@ import {
   serverTimestamp,
   collection,
   getDocs,
+  where,
+  query,
 } from "firebase/firestore";
 import { db } from "src/boot/firebase";
 import { ref } from "vue";
@@ -26,6 +28,9 @@ export const useMatchStore = defineStore("match", {
     }),
     storedName: "",
     matchList: [],
+    dota2List: [],
+    tableLoading: false,
+    isOpen: false,
     matchColumns: [
       {
         name: "host",
@@ -59,6 +64,7 @@ export const useMatchStore = defineStore("match", {
   }),
   actions: {
     async getMatches() {
+      this.tableLoading = true;
       const query = await getDocs(collection(db, "matches"));
       const matchArray = [];
       query.forEach((doc) => {
@@ -66,9 +72,206 @@ export const useMatchStore = defineStore("match", {
       });
 
       this.matchList = matchArray;
-      console.log(this.matchList);
+
+      this.tableLoading = false;
+    },
+    async getDota2() {
+      this.tableLoading = true;
+      const gameQuery = query(
+        collection(db, "matches"),
+        where("game", "==", "Dota2"),
+        where("status", "==", "Open")
+      );
+      const querySnapshot = await getDocs(gameQuery);
+      const gameData = [];
+      querySnapshot.forEach((doc) => {
+        gameData.push(doc.data());
+      });
+      this.matchList = gameData;
+      this.tableLoading = false;
+    },
+    async getMl() {
+      this.tableLoading = true;
+      const gameQuery = query(
+        collection(db, "matches"),
+        where("game", "==", "Mobile Legends"),
+        where("status", "==", "Open")
+      );
+      const querySnapshot = await getDocs(gameQuery);
+      const gameData = [];
+      querySnapshot.forEach((doc) => {
+        gameData.push(doc.data());
+      });
+      this.matchList = gameData;
+      this.tableLoading = false;
+    },
+    async getCrossfire() {
+      this.tableLoading = true;
+      const gameQuery = query(
+        collection(db, "matches"),
+        where("game", "==", "Crossfire"),
+        where("status", "==", "Open")
+      );
+      const querySnapshot = await getDocs(gameQuery);
+      const gameData = [];
+      querySnapshot.forEach((doc) => {
+        gameData.push(doc.data());
+      });
+      this.matchList = gameData;
+      this.tableLoading = false;
+    },
+    async getCsGo() {
+      this.tableLoading = true;
+      const gameQuery = query(
+        collection(db, "matches"),
+        where("game", "==", "CS: Go"),
+        where("status", "==", "Open")
+      );
+      const querySnapshot = await getDocs(gameQuery);
+      const gameData = [];
+      querySnapshot.forEach((doc) => {
+        gameData.push(doc.data());
+      });
+      this.matchList = gameData;
+      this.tableLoading = false;
+    },
+    async getValorant() {
+      this.tableLoading = true;
+      const gameQuery = query(
+        collection(db, "matches"),
+        where("game", "==", "Valorant"),
+        where("status", "==", "Open")
+      );
+      const querySnapshot = await getDocs(gameQuery);
+      const gameData = [];
+      querySnapshot.forEach((doc) => {
+        gameData.push(doc.data());
+      });
+      this.matchList = gameData;
+      this.tableLoading = false;
+    },
+    async getCodM() {
+      this.tableLoading = true;
+      const gameQuery = query(
+        collection(db, "matches"),
+        where("game", "==", "CODM"),
+        where("status", "==", "Open")
+      );
+      const querySnapshot = await getDocs(gameQuery);
+      const gameData = [];
+      querySnapshot.forEach((doc) => {
+        gameData.push(doc.data());
+      });
+      this.matchList = gameData;
+      this.tableLoading = false;
+    },
+    async getPubg() {
+      this.tableLoading = true;
+      const gameQuery = query(
+        collection(db, "matches"),
+        where("game", "==", "PUBG"),
+        where("status", "==", "Open")
+      );
+      const querySnapshot = await getDocs(gameQuery);
+      const gameData = [];
+      querySnapshot.forEach((doc) => {
+        gameData.push(doc.data());
+      });
+      this.matchList = gameData;
+      this.tableLoading = false;
+    },
+    async getAov() {
+      this.tableLoading = true;
+      const gameQuery = query(
+        collection(db, "matches"),
+        where("game", "==", "AOV"),
+        where("status", "==", "Open")
+      );
+      const querySnapshot = await getDocs(gameQuery);
+      const gameData = [];
+      querySnapshot.forEach((doc) => {
+        gameData.push(doc.data());
+      });
+      this.matchList = gameData;
+      this.tableLoading = false;
+    },
+    async getApex() {
+      this.tableLoading = true;
+      const gameQuery = query(
+        collection(db, "matches"),
+        where("game", "==", "Apex"),
+        where("status", "==", "Open")
+      );
+      const querySnapshot = await getDocs(gameQuery);
+      const gameData = [];
+      querySnapshot.forEach((doc) => {
+        gameData.push(doc.data());
+      });
+      this.matchList = gameData;
+      this.tableLoading = false;
+    },
+    async getApex() {
+      this.tableLoading = true;
+      const gameQuery = query(
+        collection(db, "matches"),
+        where("game", "==", "Apex Legends"),
+        where("status", "==", "Open")
+      );
+      const querySnapshot = await getDocs(gameQuery);
+      const gameData = [];
+      querySnapshot.forEach((doc) => {
+        gameData.push(doc.data());
+      });
+      this.matchList = gameData;
+      this.tableLoading = false;
+    },
+    async getFornite() {
+      this.tableLoading = true;
+      const gameQuery = query(
+        collection(db, "matches"),
+        where("game", "==", "Fortnite"),
+        where("status", "==", "Open")
+      );
+      const querySnapshot = await getDocs(gameQuery);
+      const gameData = [];
+      querySnapshot.forEach((doc) => {
+        gameData.push(doc.data());
+      });
+      this.matchList = gameData;
+      this.tableLoading = false;
+    },
+    async getLol() {
+      this.tableLoading = true;
+      const gameQuery = query(
+        collection(db, "matches"),
+        where("game", "==", "League of Legends"),
+        where("status", "==", "Open")
+      );
+      const querySnapshot = await getDocs(gameQuery);
+      const gameData = [];
+      querySnapshot.forEach((doc) => {
+        gameData.push(doc.data());
+      });
+      this.matchList = gameData;
+      this.tableLoading = false;
+    },
+    async getRocket() {
+      this.tableLoading = true;
+      const gameQuery = query(
+        collection(db, "matches"),
+        where("game", "==", "Rocket League"),
+        where("status", "==", "Open")
+      );
+      const querySnapshot = await getDocs(gameQuery);
+      const gameData = [];
+      querySnapshot.forEach((doc) => {
+        gameData.push(doc.data());
+      });
+      this.matchList = gameData;
+      this.tableLoading = false;
     },
     async createMatch() {
+      this.tableLoading = true;
       const counterRef = doc(db, "counters", "matchCounter");
 
       const counterDoc = await getDoc(counterRef);
@@ -103,6 +306,11 @@ export const useMatchStore = defineStore("match", {
         timestamp: serverTimestamp(),
       };
       await setDoc(doc(db, "matches", newMatchId), docData);
+      this.isOpen = false;
+      this.tableLoading = false;
+    },
+    openModal() {
+      this.isOpen = true;
     },
   },
 });
