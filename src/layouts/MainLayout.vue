@@ -12,7 +12,7 @@
           <q-tab
             v-if="!isAuthenticated"
             label="Login"
-            @click="showLoginDialog = true"
+            @click="store.openModal"
           />
           <!-- <q-avatar class="bg-secondary" icon="person" /> -->
           <q-btn-dropdown
@@ -45,12 +45,11 @@
       </q-toolbar>
     </q-header>
     <!-- Login / Register -->
-    <login-dialog
-      :modelValue="showLoginDialog"
-      @update:modelValue="showLoginDialog = $event"
-    />
-
-    <q-page-container>
+    <login-dialog :modelValue="isOpen" @update:modelValue="isOpen = $event" />
+    <div v-if="isLoading" class="text-center absolute-center">
+      <h1>Loading..</h1>
+    </div>
+    <q-page-container v-else>
       <router-view />
     </q-page-container>
   </q-layout>
@@ -64,7 +63,7 @@ import { useAuthStore } from "src/stores/authStore";
 
 const store = useAuthStore();
 
-const { isAuthenticated, profileName } = storeToRefs(store);
+const { isAuthenticated, profileName, isLoading, isOpen } = storeToRefs(store);
 
 defineOptions({
   name: "MainLayout",

@@ -151,7 +151,7 @@ import { useAuthStore } from "src/stores/authStore";
 
 const store = useAuthStore();
 
-const { formData, registerForm } = storeToRefs(store);
+const { formData, registerForm, isOpen } = storeToRefs(store);
 
 const props = defineProps({
   modelValue: {
@@ -177,15 +177,6 @@ const model = computed({
   },
   set(newValue) {
     emit("update:modelValue", newValue);
-  },
-});
-
-const isLogin = computed({
-  get() {
-    return props.isLogin;
-  },
-  set(newValue) {
-    emit("update:isLogin", newValue);
   },
 });
 </script>

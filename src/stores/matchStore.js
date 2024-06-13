@@ -27,7 +27,7 @@ export const useMatchStore = defineStore("match", {
       timestamp: "",
     }),
     storedName: "",
-    matchList: [],
+    matchList: ref([]),
     dota2List: [],
     tableLoading: false,
     isOpen: false,

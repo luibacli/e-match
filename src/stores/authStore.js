@@ -23,12 +23,14 @@ export const useAuthStore = defineStore("auth", {
       confirmPassword: "",
     }),
     profileName: ref(""),
+    isOpen: false,
     isLogin: true,
     isAuthenticated: false,
     isLoading: false,
   }),
   actions: {
     async loginEmailPassword() {
+      this.isLoading = true;
       const userData = this.formData;
       try {
         const userCredential = await signInWithEmailAndPassword(
@@ -37,10 +39,9 @@ export const useAuthStore = defineStore("auth", {
           userData.password
         );
         const user = userCredential.user;
-
+        this.isOpen = false;
         this.router.push("/play");
-        console.log("log", this.isAuthenticated);
-        console.log(userCredential.user);
+        this.isLoading = false;
       } catch (error) {
         console.log(error);
       }
@@ -88,6 +89,9 @@ export const useAuthStore = defineStore("auth", {
       this.isAuthenticated = false;
       this.router.push("/");
       console.log("You are now logged out");
+    },
+    openModal() {
+      this.isOpen = true;
     },
   },
 });
