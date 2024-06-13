@@ -76,8 +76,9 @@ export const useAuthStore = defineStore("auth", {
         if (user) {
           this.isAuthenticated = true;
           this.profileName = user.displayName;
-          console.log(user);
+          localStorage.setItem("displayName", user.displayName);
         } else {
+          localStorage.removeItem("displayName");
           console.log("You are not logged in");
         }
       });
