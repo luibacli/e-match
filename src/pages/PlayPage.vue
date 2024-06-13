@@ -25,14 +25,14 @@
     </div>
     <q-btn class="bg-warning" label="test" @click="store.getMatches" />
     <q-btn class="bg-warning" label="dota2" @click="store.getDota2" /> -->
-    <div v-if="tableLoading"></div>
+    <div v-if="tableLoading">Loading...</div>
     <div v-else class="row q-pa-md q-gutter-md justify-start">
       <q-card
         class="bg-primary text-warning match-card"
         v-for="game in games"
         :key="game.id"
         ><q-card-section class="row" horizontal
-          ><q-card-section class="text-bold">1 vs 1</q-card-section>
+          ><q-card-section class="text-bold">{{ game.type }}</q-card-section>
 
           <q-card-section>ID: {{ game.id }} </q-card-section>
         </q-card-section>
