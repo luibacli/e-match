@@ -1,9 +1,6 @@
 <template>
   <q-dialog v-model="model">
-    <q-card
-      class="bg-primary q-pa-sm dialog"
-      style="max-width: 100%; width: 350px"
-    >
+    <q-card class="bg-primary q-pa-sm" style="max-width: 100%; width: 350px">
       <q-card-section>
         <div class="text-warning text-right absolute-top text-h7">
           <q-btn label="x" v-close-popup />

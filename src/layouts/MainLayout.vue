@@ -57,10 +57,11 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import LoginDialog from "src/components/LoginDialog.vue";
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "src/stores/authStore";
+
 const store = useAuthStore();
 
 const { isAuthenticated, profileName } = storeToRefs(store);
@@ -73,8 +74,20 @@ const showLoginDialog = ref(false);
 const showSignUpDialog = ref(false);
 const fullHeight = ref(false);
 
-function openLogin() {
-  login.value = true;
+function btnPlay() {
+  if (!isAuthenticated) {
+    showLoginDialog.value = true;
+  } else {
+    this.router.push("/play");
+  }
+}
+
+function btnRanks() {
+  if (!isAuthenticated) {
+    showLoginDialog.value = true;
+  } else {
+    this.router.push("/ranks");
+  }
 }
 
 const linksList = [

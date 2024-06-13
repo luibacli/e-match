@@ -37,9 +37,9 @@ export const useAuthStore = defineStore("auth", {
           userData.password
         );
         const user = userCredential.user;
-        this.profileName = user.displayName;
-        this.isAuthenticated = true;
+
         this.router.push("/play");
+        console.log("log", this.isAuthenticated);
         console.log(userCredential.user);
       } catch (error) {
         console.log(error);
@@ -74,6 +74,8 @@ export const useAuthStore = defineStore("auth", {
     async monitorAuthState() {
       onAuthStateChanged(auth, (user) => {
         if (user) {
+          this.isAuthenticated = true;
+          this.profileName = user.displayName;
           console.log(user);
         } else {
           console.log("You are not logged in");
