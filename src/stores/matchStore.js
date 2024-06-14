@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { db } from "src/boot/firebase";
 import { ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 export const useMatchStore = defineStore("match", {
   state: () => ({
@@ -26,11 +27,13 @@ export const useMatchStore = defineStore("match", {
       status: "",
       timestamp: "",
     }),
-    storedName: "",
+    matchId: ref(""),
+    storedName: ref(""),
+    gameName: ref(""),
     matchList: ref([]),
-    dota2List: [],
-    tableLoading: false,
-    isOpen: false,
+
+    tableLoading: ref(false),
+    isOpen: ref(false),
     matchColumns: [
       {
         name: "host",
@@ -62,6 +65,12 @@ export const useMatchStore = defineStore("match", {
       },
     ],
   }),
+  getters: {
+    routeMatch: () => {
+      const route = useRoute();
+      return route.params.matchId;
+    },
+  },
   actions: {
     async getMatches() {
       this.tableLoading = true;
@@ -87,7 +96,10 @@ export const useMatchStore = defineStore("match", {
       querySnapshot.forEach((doc) => {
         gameData.push(doc.data());
       });
+
       this.matchList = gameData;
+      this.gameName = "Dota2";
+
       this.tableLoading = false;
     },
     async getMl() {
@@ -103,6 +115,7 @@ export const useMatchStore = defineStore("match", {
         gameData.push(doc.data());
       });
       this.matchList = gameData;
+      this.gameName = "Mobile Legends";
       this.tableLoading = false;
     },
     async getCrossfire() {
@@ -118,6 +131,7 @@ export const useMatchStore = defineStore("match", {
         gameData.push(doc.data());
       });
       this.matchList = gameData;
+      this.gameName = "Crossfire";
       this.tableLoading = false;
     },
     async getCsGo() {
@@ -133,6 +147,7 @@ export const useMatchStore = defineStore("match", {
         gameData.push(doc.data());
       });
       this.matchList = gameData;
+      this.gameName = "CS: Go";
       this.tableLoading = false;
     },
     async getValorant() {
@@ -148,6 +163,7 @@ export const useMatchStore = defineStore("match", {
         gameData.push(doc.data());
       });
       this.matchList = gameData;
+      this.gameName = "Valorant";
       this.tableLoading = false;
     },
     async getCodM() {
@@ -178,6 +194,7 @@ export const useMatchStore = defineStore("match", {
         gameData.push(doc.data());
       });
       this.matchList = gameData;
+      this.gameName = "PUBG";
       this.tableLoading = false;
     },
     async getAov() {
@@ -193,23 +210,10 @@ export const useMatchStore = defineStore("match", {
         gameData.push(doc.data());
       });
       this.matchList = gameData;
+      this.gameName = "AOV";
       this.tableLoading = false;
     },
-    async getApex() {
-      this.tableLoading = true;
-      const gameQuery = query(
-        collection(db, "matches"),
-        where("game", "==", "Apex"),
-        where("status", "==", "Open")
-      );
-      const querySnapshot = await getDocs(gameQuery);
-      const gameData = [];
-      querySnapshot.forEach((doc) => {
-        gameData.push(doc.data());
-      });
-      this.matchList = gameData;
-      this.tableLoading = false;
-    },
+
     async getApex() {
       this.tableLoading = true;
       const gameQuery = query(
@@ -223,6 +227,7 @@ export const useMatchStore = defineStore("match", {
         gameData.push(doc.data());
       });
       this.matchList = gameData;
+      this.gameName = "Apex Legends";
       this.tableLoading = false;
     },
     async getFornite() {
@@ -238,6 +243,7 @@ export const useMatchStore = defineStore("match", {
         gameData.push(doc.data());
       });
       this.matchList = gameData;
+      this.gameName = "Fornite";
       this.tableLoading = false;
     },
     async getLol() {
@@ -253,6 +259,7 @@ export const useMatchStore = defineStore("match", {
         gameData.push(doc.data());
       });
       this.matchList = gameData;
+      this.gameName = "League of Legends";
       this.tableLoading = false;
     },
     async getRocket() {
@@ -267,6 +274,41 @@ export const useMatchStore = defineStore("match", {
       querySnapshot.forEach((doc) => {
         gameData.push(doc.data());
       });
+      this.matchList = gameData;
+      this.gameName = "Rocket League";
+      this.tableLoading = false;
+    },
+    async filterOne() {
+      this.tableLoading = true;
+      const gameQuery = query(
+        collection(db, "matches"),
+        where("game", "==", `${this.gameName}`),
+        where("type", "==", "1vs1"),
+        where("status", "==", "Open")
+      );
+      const gameData = [];
+      const querySnapshot = await getDocs(gameQuery);
+      querySnapshot.forEach((doc) => {
+        gameData.push(doc.data());
+      });
+
+      this.matchList = gameData;
+      this.tableLoading = false;
+    },
+    async filterTeam() {
+      this.tableLoading = true;
+      const gameQuery = query(
+        collection(db, "matches"),
+        where("game", "==", `${this.gameName}`),
+        where("type", "==", "TvsT"),
+        where("status", "==", "Open")
+      );
+      const gameData = [];
+      const querySnapshot = await getDocs(gameQuery);
+      querySnapshot.forEach((doc) => {
+        gameData.push(doc.data());
+      });
+
       this.matchList = gameData;
       this.tableLoading = false;
     },
@@ -305,7 +347,16 @@ export const useMatchStore = defineStore("match", {
         status: "Open",
         timestamp: serverTimestamp(),
       };
+      this.matchId = docData.id;
+      console.log(this.matchId);
       await setDoc(doc(db, "matches", newMatchId), docData);
+      this.router.push(`/play/${this.matchId}`);
+
+      // const router = useRouter();
+
+      // router.push(`/play/${this.routeMatch}`);
+      // console.log(this.matchId);
+      // console.log(this.routeMatch);
       this.isOpen = false;
       this.tableLoading = false;
     },

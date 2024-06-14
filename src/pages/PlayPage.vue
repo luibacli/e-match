@@ -8,9 +8,13 @@
     </div>
     <div class="bg-primary text-warning">
       <q-tabs>
-        <q-tab label="1 vs 1" style="width: 100%" />
-        <q-tab label="Team Vs Team" style="width: 100%" />
-        <q-tab label="Tournament" style="width: 100%" />
+        <q-tab label="1 vs 1" style="width: 100%" @click="store.filterOne" />
+        <q-tab
+          label="Team Vs Team"
+          style="width: 100%"
+          @click="store.filterTeam"
+        />
+        <!-- <q-tab label="Tournament" style="width: 100%" /> -->
       </q-tabs>
     </div>
     <!-- <div v-if="tableLoading">Loading....</div>
@@ -37,8 +41,18 @@
     </div>
     <q-btn class="bg-warning" label="test" @click="store.getMatches" />
     <q-btn class="bg-warning" label="dota2" @click="store.getDota2" /> -->
-    <div v-if="tableLoading"></div>
+
+    <div v-if="tableLoading" class="text-warning">
+      <h1>Loading...</h1>
+    </div>
+
     <div v-else class="row q-pa-sm">
+      <div
+        v-show="hasData"
+        class="text-warning row text-center absolute-center"
+      >
+        <h1>No Data to Show</h1>
+      </div>
       <div class="row q-gutter-sm justify-center">
         <div class="row" v-for="game in games" :key="game.id">
           <q-card class="bg-primary text-warning match-card">
@@ -88,14 +102,21 @@ import CreateMatch from "src/components/CreateMatch.vue";
 import { onMounted, ref, defineEmits, watch } from "vue";
 import { useMatchStore } from "src/stores/matchStore";
 import { storeToRefs } from "pinia";
+
 const store = useMatchStore();
 
 const { matchList, matchColumns, tableLoading, isOpen } = storeToRefs(store);
 
 const games = ref([]);
+const hasData = ref(false);
 
 watch(matchList, (newList) => {
   games.value = newList;
+  if (games.value.length == 0) {
+    hasData.value = true;
+  } else {
+    hasData.value = false;
+  }
 });
 </script>
 

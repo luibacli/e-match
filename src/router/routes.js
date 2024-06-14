@@ -1,3 +1,7 @@
+// import { storeToRefs } from "pinia";
+// import { useMatchStore } from "src/stores/matchStore";
+// const store = useMatchStore();
+// const { matchId } = storeToRefs(store);
 const routes = [
   {
     path: "/",
@@ -7,6 +11,10 @@ const routes = [
       {
         path: "play",
         component: () => import("pages/PlayPage.vue"),
+      },
+      {
+        path: "play/:matchId",
+        component: () => import("pages/MatchPage.vue"),
       },
       { path: "ranks", component: () => import("pages/RankingPage.vue") },
     ],

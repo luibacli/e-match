@@ -35,9 +35,12 @@
 import { storeToRefs } from "pinia";
 import { useMatchStore } from "src/stores/matchStore";
 import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 const store = useMatchStore();
 
-const { match } = storeToRefs(store);
+const { match, matchId } = storeToRefs(store);
 
 const options = ["Dota2", "Mobile Legends", "Valorant"];
 const teamOptions = ["1vs1", "TvsT"];
