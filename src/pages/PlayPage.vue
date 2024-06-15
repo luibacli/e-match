@@ -43,15 +43,12 @@
     <q-btn class="bg-warning" label="dota2" @click="store.getDota2" /> -->
 
     <div v-if="tableLoading" class="text-warning">
-      <h1>Loading...</h1>
+      <div class="text-warning text-h5">Loading....</div>
     </div>
 
     <div v-else class="row q-pa-sm">
-      <div
-        v-show="hasData"
-        class="text-warning row text-center absolute-center"
-      >
-        <h1>No Data to Show</h1>
+      <div v-show="hasData" class="text-warning row text-center">
+        <div class="text-warning justify-center text-h5">No match created</div>
       </div>
       <div class="row q-gutter-sm justify-center">
         <div class="row" v-for="game in games" :key="game.id">

@@ -42,7 +42,20 @@ const store = useMatchStore();
 
 const { match, matchId } = storeToRefs(store);
 
-const options = ["Dota2", "Mobile Legends", "Valorant"];
+const options = [
+  "Dota2",
+  "Mobile Legends",
+  "Valorant",
+  "Crossfire",
+  "CS: Go",
+  "CODM",
+  "PUBG",
+  "League of Legends",
+  "AOV",
+  "Apex Legends",
+  "Fortnite",
+  "Rocket League",
+];
 const teamOptions = ["1vs1", "TvsT"];
 const props = defineProps({
   isOpen: Boolean,
