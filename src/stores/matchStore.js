@@ -336,6 +336,7 @@ export const useMatchStore = defineStore("match", {
       const data = docSnap.data();
       this.matchData.id = data.id;
       this.matchData.game = data.game;
+      this.matchData.bet = data.bet;
       this.matchData.host = data.host;
       this.matchData.type = data.type;
       this.matchData.winner = data.winner;
@@ -381,7 +382,6 @@ export const useMatchStore = defineStore("match", {
       console.log(this.matchId);
       await setDoc(doc(db, "matches", newMatchId), docData);
       this.router.push(`/play/${this.matchId}`);
-      await this.loadMatch(newMatchId);
 
       this.isOpen = false;
       this.tableLoading = false;

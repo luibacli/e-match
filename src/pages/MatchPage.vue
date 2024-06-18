@@ -12,8 +12,8 @@
         horizontal
         class="row justify-between bg-primary text-warning text-h5"
       >
-        <q-card-section>Bet: 500</q-card-section>
-        <q-card-section>e-match ID: 52</q-card-section>
+        <q-card-section>Bet: {{ matchData.bet }}</q-card-section>
+        <q-card-section>e-match ID: {{ matchData.id }}</q-card-section>
       </q-card-section>
       <q-card-section
         horizontal
@@ -21,7 +21,9 @@
         ><q-card-section
           ><q-avatar
             ><img src="https://cdn.quasar.dev/img/avatar.png" /></q-avatar
-          ><span class="text-positive text-subtitle1"> Team B</span>
+          ><span class="text-positive text-subtitle1 q-ml-md">
+            {{ matchData.host }}</span
+          >
           <q-card-section
             >Players:
             <ul>
@@ -37,7 +39,7 @@
           ><q-avatar
             ><img src="https://cdn.quasar.dev/img/avatar.png"
           /></q-avatar>
-          <span class="text-red text-subtitle1"> Team B</span>
+          <span class="text-red text-subtitle1 q-ml-md"> Team B</span>
           <q-card-section
             >Players:
             <ul>
@@ -59,8 +61,11 @@
 <script setup>
 import { useMatchStore } from "src/stores/matchStore";
 import { onMounted } from "vue";
+import { storeToRefs } from "pinia";
 
 const matchStore = useMatchStore();
+
+const { matchData } = storeToRefs(matchStore);
 
 onMounted(() => {
   matchStore.joinMatch();
