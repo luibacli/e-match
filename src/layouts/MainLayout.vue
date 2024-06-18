@@ -7,8 +7,8 @@
         ></q-btn>
 
         <q-tabs>
-          <q-route-tab label="Play" :to="'/play'" />
-          <q-route-tab label="Ranks" :to="'/ranks'" />
+          <q-tab label="Play" @click="store.btnPlay" />
+          <q-tab label="Ranks" :to="'/ranks'" />
           <q-tab
             v-if="!isAuthenticated"
             label="Login"
@@ -44,11 +44,13 @@
         </q-tabs>
       </q-toolbar>
     </q-header>
+    <div><q-btn label="EvaTest" class="bg-warning" /></div>
     <!-- Login / Register -->
     <login-dialog :modelValue="isOpen" @update:modelValue="isOpen = $event" />
     <div v-if="isLoading" class="text-center absolute-center">
       <h1>Loading..</h1>
     </div>
+
     <q-page-container v-else>
       <router-view />
     </q-page-container>
@@ -63,7 +65,8 @@ import { useAuthStore } from "src/stores/authStore";
 
 const store = useAuthStore();
 
-const { isAuthenticated, profileName, isLoading, isOpen } = storeToRefs(store);
+const { isAuthenticated, profileName, isLoading, isOpen, showLogin } =
+  storeToRefs(store);
 
 defineOptions({
   name: "MainLayout",
@@ -73,13 +76,14 @@ const showLoginDialog = ref(false);
 const showSignUpDialog = ref(false);
 const fullHeight = ref(false);
 
-function btnPlay() {
-  if (!isAuthenticated) {
-    showLoginDialog.value = true;
-  } else {
-    this.router.push("/play");
-  }
-}
+// function btnPlay() {
+//   if (isAuthenticated == false) {
+//     console.log(isAuthenticated);
+//     showLoginDialog.value = true;
+//   } else {
+//     router.push("/play");
+//   }
+// }
 
 function btnRanks() {
   if (!isAuthenticated) {

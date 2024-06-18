@@ -27,6 +27,16 @@ export const useMatchStore = defineStore("match", {
       status: "",
       timestamp: "",
     }),
+    matchData: ref({
+      id: "",
+      host: "",
+      game: "",
+      type: "",
+      bet: 0,
+      winner: "",
+      status: "",
+      timestamp: "",
+    }),
     matchId: ref(""),
     storedName: ref(""),
     gameName: ref(""),
@@ -312,6 +322,26 @@ export const useMatchStore = defineStore("match", {
       this.matchList = gameData;
       this.tableLoading = false;
     },
+    async loadMatch(id) {
+      const docRef = doc(db, "matches", id);
+
+      const docSnap = await getDoc(docRef);
+      console.log("data", docSnap.data());
+    },
+    async getMatch() {},
+    async joinMatch() {
+      const docRef = doc(db, "matches", this.routeMatch);
+
+      const docSnap = await getDoc(docRef);
+      const data = docSnap.data();
+      this.matchData.id = data.id;
+      this.matchData.game = data.game;
+      this.matchData.host = data.host;
+      this.matchData.type = data.type;
+      this.matchData.winner = data.winner;
+      this.matchData.status = data.status;
+      console.log("match data", this.matchData);
+    },
     async createMatch() {
       this.tableLoading = true;
       const counterRef = doc(db, "counters", "matchCounter");
@@ -338,7 +368,7 @@ export const useMatchStore = defineStore("match", {
       }
 
       const docData = {
-        id: `ematch-${newMatchId}`,
+        id: `${newMatchId}`,
         host: getHost,
         game: this.match.game,
         type: this.match.type,
@@ -351,15 +381,12 @@ export const useMatchStore = defineStore("match", {
       console.log(this.matchId);
       await setDoc(doc(db, "matches", newMatchId), docData);
       this.router.push(`/play/${this.matchId}`);
+      await this.loadMatch(newMatchId);
 
-      // const router = useRouter();
-
-      // router.push(`/play/${this.routeMatch}`);
-      // console.log(this.matchId);
-      // console.log(this.routeMatch);
       this.isOpen = false;
       this.tableLoading = false;
     },
+
     openModal() {
       this.isOpen = true;
     },

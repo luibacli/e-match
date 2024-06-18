@@ -23,6 +23,7 @@ export const useAuthStore = defineStore("auth", {
       confirmPassword: "",
     }),
     profileName: ref(""),
+    showLogin: ref(false),
     isOpen: false,
     isLogin: true,
     isAuthenticated: false,
@@ -92,6 +93,13 @@ export const useAuthStore = defineStore("auth", {
     },
     openModal() {
       this.isOpen = true;
+    },
+    btnPlay() {
+      if (!this.isAuthenticated) {
+        this.openModal();
+      } else {
+        this.router.push("/play");
+      }
     },
   },
 });

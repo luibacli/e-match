@@ -4,6 +4,15 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { useMatchStore } from "src/stores/matchStore";
+import { onMounted } from "vue";
+
+const matchStore = useMatchStore();
+
+onMounted(() => {
+  matchStore.joinMatch();
+});
+</script>
 
 <style lang="scss" scoped></style>

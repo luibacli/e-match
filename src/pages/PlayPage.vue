@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="isAuthenticated">
     <gameCards />
     <CreateMatch :isOpen="isOpen" @update:isOpen="isOpen = $event" />
 
@@ -84,7 +84,14 @@
               </div>
             </q-card-section>
             <div class="row justify-center q-mb-sm">
-              <q-btn class="bg-green" flat dense label="Challenge" size="sm" />
+              <q-btn
+                class="bg-green"
+                flat
+                dense
+                label="Challenge"
+                size="sm"
+                :to="`/play/${game.id}`"
+              />
             </div>
           </q-card>
         </div>
@@ -98,11 +105,15 @@ import gameCards from "src/components/gameCards.vue";
 import CreateMatch from "src/components/CreateMatch.vue";
 import { onMounted, ref, defineEmits, watch } from "vue";
 import { useMatchStore } from "src/stores/matchStore";
+
 import { storeToRefs } from "pinia";
+import { useAuthStore } from "src/stores/authStore";
 
 const store = useMatchStore();
+const authStore = useAuthStore();
 
 const { matchList, matchColumns, tableLoading, isOpen } = storeToRefs(store);
+const { isAuthenticated } = storeToRefs(authStore);
 
 const games = ref([]);
 const hasData = ref(false);
