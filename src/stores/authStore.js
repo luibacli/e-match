@@ -21,6 +21,7 @@ export const useAuthStore = defineStore("auth", {
       phoneNumber: "",
       password: "",
       confirmPassword: "",
+      teams: [],
     }),
     profileName: ref(""),
     showLogin: ref(false),
@@ -79,6 +80,7 @@ export const useAuthStore = defineStore("auth", {
           this.isAuthenticated = true;
           this.profileName = user.displayName;
           localStorage.setItem("displayName", user.displayName);
+          localStorage.setItem("userId", user.uid);
         } else {
           localStorage.removeItem("displayName");
           console.log("You are not logged in");

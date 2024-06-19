@@ -10,10 +10,12 @@ import {
   getDocs,
   where,
   query,
+  arrayUnion,
 } from "firebase/firestore";
 import { db } from "src/boot/firebase";
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { data } from "autoprefixer";
 
 export const useMatchStore = defineStore("match", {
   state: () => ({
@@ -37,10 +39,45 @@ export const useMatchStore = defineStore("match", {
       status: "",
       timestamp: "",
     }),
+    userId: ref(""),
     matchId: ref(""),
     storedName: ref(""),
     gameName: ref(""),
     matchList: ref([]),
+    teamData: ref({
+      id: "",
+      name: "",
+      member1: "",
+      member2: "",
+      member3: "",
+      member4: "",
+      member5: "",
+      wins: 0,
+      loss: 0,
+      timestamp: "",
+      userRef: "",
+    }),
+    teamOptions: ref([]),
+    // teamList: ref({
+    //   id: "",
+    //   name: "",
+    //   member1: "",
+    //   member2: "",
+    //   member3: "",
+    //   member4: "",
+    //   member5: "",
+    // }),
+    teamList: ref([]),
+    teamOptions: ref({}),
+    teamModal: ref(false),
+    teamLoading: ref(false),
+    playerList: ref({
+      player1: "",
+      player2: "",
+      player3: "",
+      player4: "",
+      player5: "",
+    }),
 
     tableLoading: ref(false),
     isOpen: ref(false),
@@ -79,6 +116,9 @@ export const useMatchStore = defineStore("match", {
     routeMatch: () => {
       const route = useRoute();
       return route.params.matchId;
+    },
+    playerId: () => {
+      return localStorage.getItem("userId");
     },
   },
   actions: {
@@ -253,7 +293,7 @@ export const useMatchStore = defineStore("match", {
         gameData.push(doc.data());
       });
       this.matchList = gameData;
-      this.gameName = "Fornite";
+      this.gameName = "Fortnite";
       this.tableLoading = false;
     },
     async getLol() {
@@ -343,6 +383,65 @@ export const useMatchStore = defineStore("match", {
       this.matchData.status = data.status;
       console.log("match data", this.matchData);
     },
+    async loadTeam() {
+      const q = query(
+        collection(db, "teams"),
+        where("userRef", "==", this.playerId)
+      );
+      const querySnap = await getDocs(q);
+      const teamData = [];
+      querySnap.forEach((doc) => {
+        return teamData.push({
+          id: doc.id,
+          data: doc.data(),
+        });
+      });
+
+      this.teamList = teamData;
+      const optionData = [];
+      teamData.forEach((team) => {
+        return optionData.push({
+          label: team.data.name,
+          value: team.id,
+        });
+      });
+      this.teamOptions = optionData;
+
+      console.log("options", this.teamOptions);
+    },
+    async setTeam(teamId) {
+      const docRef = doc(db, "teams", teamId);
+
+      const docSnap = await getDoc(docRef);
+      const data = docSnap.data();
+      this.playerList.player1 = data.member1;
+      this.playerList.player2 = data.member2;
+      this.playerList.player3 = data.member3;
+      this.playerList.player4 = data.member4;
+      this.playerList.player5 = data.member5;
+    },
+    async createTeam() {
+      const docData = {
+        name: this.teamData.name,
+        member1: this.teamData.member1,
+        member2: this.teamData.member2,
+        member3: this.teamData.member3,
+        member4: this.teamData.member4,
+        member5: this.teamData.member5,
+        wins: this.teamData.wins,
+        loss: this.teamData.loss,
+        userRef: this.playerId,
+        timestamp: serverTimestamp(),
+      };
+
+      const teamRef = collection(db, "teams");
+
+      await addDoc(teamRef, docData);
+
+      this.clearTeamData();
+      this.teamModal = false;
+      console.log("team Data", docData);
+    },
     async createMatch() {
       this.tableLoading = true;
       const counterRef = doc(db, "counters", "matchCounter");
@@ -389,6 +488,25 @@ export const useMatchStore = defineStore("match", {
 
     openModal() {
       this.isOpen = true;
+    },
+    openTeamModal() {
+      this.teamModal = true;
+    },
+    clearPlayers() {
+      this.playerList.player1 = "";
+      this.playerList.player2 = "";
+      this.playerList.player3 = "";
+      this.playerList.player4 = "";
+      this.playerList.player5 = "";
+    },
+    clearTeamData() {
+      this.teamData.id = "";
+      this.teamData.name = "";
+      this.teamData.member1 = "";
+      this.teamData.member2 = "";
+      this.teamData.member3 = "";
+      this.teamData.member4 = "";
+      this.teamData.member5 = "";
     },
   },
 });
