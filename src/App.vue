@@ -16,7 +16,11 @@ import { db } from "./boot/firebase";
 //   await setDoc(counterRef, { counter: 0 });
 // }
 const store = useAuthStore();
+const { isAuthenticated, userData } = store;
 onMounted(() => {
   store.monitorAuthState();
+  if (isAuthenticated) {
+    store.getUser();
+  }
 });
 </script>

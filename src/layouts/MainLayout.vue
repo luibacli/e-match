@@ -20,7 +20,7 @@
             flat
             dense
             class="text-warning"
-            :label="profileName"
+            :label="store.user.name"
             ><q-list class="bg-primary text-warning">
               <q-item clickable v-close-popup @click="onItemClick">
                 <q-item-section>
@@ -75,15 +75,6 @@ defineOptions({
 const showLoginDialog = ref(false);
 const showSignUpDialog = ref(false);
 const fullHeight = ref(false);
-
-// function btnPlay() {
-//   if (isAuthenticated == false) {
-//     console.log(isAuthenticated);
-//     showLoginDialog.value = true;
-//   } else {
-//     router.push("/play");
-//   }
-// }
 
 function btnRanks() {
   if (!isAuthenticated) {

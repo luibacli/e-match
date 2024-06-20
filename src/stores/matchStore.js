@@ -16,7 +16,9 @@ import {
 import { db } from "src/boot/firebase";
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { data } from "autoprefixer";
+import { useAuthStore } from "./authStore";
+
+const authStore = useAuthStore();
 
 export const useMatchStore = defineStore("match", {
   state: () => ({
@@ -122,7 +124,10 @@ export const useMatchStore = defineStore("match", {
       return route.params.matchId;
     },
     playerId: () => {
-      return localStorage.getItem("userId");
+      return authStore.user.id;
+    },
+    host: () => {
+      return authStore.user.name;
     },
   },
   actions: {
@@ -492,8 +497,7 @@ export const useMatchStore = defineStore("match", {
 
       const newMatchId = matchCounter.toString();
 
-      const getHost = localStorage.getItem("displayName");
-      if (getHost) {
+      if (this.hostt) {
         this.storedName = getHost;
       } else {
         console.log("no display name found");
