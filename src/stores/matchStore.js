@@ -66,23 +66,13 @@ export const useMatchStore = defineStore("match", {
       member4: "",
       member5: "",
     }),
-    teamOptions: ref([]),
-    optionsModel: ref(null),
-    // teamList: ref({
-    //   id: "",
-    //   name: "",
-    //   member1: "",
-    //   member2: "",
-    //   member3: "",
-    //   member4: "",
-    //   member5: "",
-    // }),
     teamId: ref(""),
     teamList: ref([]),
     teamOptions: ref({}),
     teamModal: ref(false),
     teamUpdateModal: ref(false),
     teamDeleteModal: ref(false),
+    matchLeaveModal: ref(false),
     teamLoading: ref(false),
     playerList: ref({
       team: "",
@@ -413,17 +403,8 @@ export const useMatchStore = defineStore("match", {
       });
 
       this.teamList = teamData;
-      const optionData = [];
-      teamData.forEach((team) => {
-        return optionData.push({
-          label: team.data.name,
-          value: team.id,
-        });
-      });
-      this.teamOptions = optionData;
-      this.teamLoading = false;
 
-      console.log("options", this.teamOptions);
+      this.teamLoading = false;
     },
     async setTeam(teamId) {
       if (teamId) {
@@ -438,6 +419,7 @@ export const useMatchStore = defineStore("match", {
         this.playerList.player4 = data.member4;
         this.playerList.player5 = data.member5;
       } else {
+        this.optionsModel = "";
         this.clearPlayers();
       }
     },
@@ -479,8 +461,8 @@ export const useMatchStore = defineStore("match", {
       };
       const docRef = doc(db, "teams", this.teamId);
       await updateDoc(docRef, docData);
-      this.playerList = { ...docData };
       this.optionsModel = "";
+      this.playerList = { ...docData };
       await this.setTeam(this.teamId);
       await this.loadTeams();
     },
@@ -542,14 +524,21 @@ export const useMatchStore = defineStore("match", {
     openTeamModal() {
       this.teamModal = true;
     },
-    openTeamUpdateModal(id) {
+    openLeaveModal() {
+      this.matchLeaveModal = true;
+    },
+    async openTeamUpdateModal(id) {
       this.teamId = id;
-      this.teamUpdate.name = this.playerList.team;
-      this.teamUpdate.member1 = this.playerList.player1;
-      this.teamUpdate.member2 = this.playerList.player2;
-      this.teamUpdate.member3 = this.playerList.player3;
-      this.teamUpdate.member4 = this.playerList.player4;
-      this.teamUpdate.member5 = this.playerList.player5;
+      const docRef = doc(db, "teams", this.teamId);
+      const docSnap = await getDoc(docRef);
+
+      const data = docSnap.data();
+      this.teamUpdate.name = data.name;
+      this.teamUpdate.member1 = data.member1;
+      this.teamUpdate.member2 = data.member2;
+      this.teamUpdate.member3 = data.member3;
+      this.teamUpdate.member4 = data.member4;
+      this.teamUpdate.member5 = data.member5;
       this.teamUpdateModal = true;
     },
     openTeamDeleteModal(id) {

@@ -21,21 +21,7 @@
         </q-card-section>
         <q-card-section class="bg-primary text-warning"
           ><div class="row q-gutter-md">
-            <q-btn class="bg-blue" label="+" @click="openTeamModal" />
-
-            <q-select
-              clearable
-              class="col-6 bg-warning"
-              label="Set Team"
-              v-model="optionsModel"
-              :options="teamOptions"
-            />
-            <q-btn
-              v-if="optionsModel"
-              class="bg-red"
-              label="Confirm"
-              @click="setTeam(optionsModel.value)"
-            />
+            <q-btn class="bg-blue" label="Add Team" @click="openTeamModal" />
           </div>
         </q-card-section>
         <q-card-section
@@ -46,14 +32,6 @@
                 ><img src="https://cdn.quasar.dev/img/avatar.png"
               /></q-avatar>
               <span class="text-bold q-ml-md"></span>
-              <q-btn
-                @click="openTeamUpdateModal(optionsModel.value)"
-                dense
-                flat
-                size="sm"
-                ><q-icon name="edit"
-              /></q-btn>
-
               {{ playerList.team }}
               <div v-if="playerList" class="row justify-center">
                 <div class="col-12 text-center">{{ playerList.player1 }}</div>
@@ -74,7 +52,13 @@
           </div>
         </q-card-section>
         <q-card-section class="row justify-between bg-primary">
-          <q-btn flat dense label="Leave Match" class="bg-grey text-warning" />
+          <q-btn
+            flat
+            dense
+            label="Leave Match"
+            class="bg-grey text-warning"
+            @click="openLeaveModal"
+          />
           <q-btn label="Start!" class="bg-positive text-warning" />
         </q-card-section>
       </q-card>
@@ -89,6 +73,9 @@
               ><div class="row text-bold">
                 <div class="col-10">{{ team.data.name }}</div>
                 <div class="col q-gutter-sm">
+                  <q-btn flat dense size="sm" class="bg-gray"
+                    ><q-icon name="edit" @click="openTeamUpdateModal(team.id)"
+                  /></q-btn>
                   <q-btn flat dense size="sm" class="bg-red"
                     ><q-icon
                       name="delete"
@@ -99,8 +86,12 @@
             <q-separator />
             <q-card-section>
               <div class="row">
-                <div class="col">Wins</div>
-                <div class="col">Loss</div>
+                <div class="col">
+                  <span class="text-positive">Wins:</span> {{ team.data.wins }}
+                </div>
+                <div class="col">
+                  <span class="text-red">Loss:</span> {{ team.data.loss }}
+                </div>
               </div></q-card-section
             >
             <q-separator />
@@ -112,9 +103,17 @@
                 <li>{{ team.data.member3 }}</li>
                 <li>{{ team.data.member4 }}</li>
                 <li>{{ team.data.member5 }}</li>
-              </div></q-card-section
-            ></q-card
-          >
+              </div>
+              <div class="q-pa-sm">
+                <q-btn
+                  flat
+                  dense
+                  label="Play with this team"
+                  class="bg-green"
+                  size="sm"
+                  @click="setTeam(team.id)"
+                /></div></q-card-section
+          ></q-card>
         </div>
       </div>
     </div>
@@ -227,7 +226,7 @@
             <div class="row justify-center">
               <q-btn
                 class="bg-positive text-warning"
-                label="Create Team"
+                label="Update Team"
                 @click="updateTeam"
               />
             </div>
@@ -250,6 +249,24 @@
               dense
             /></div></q-card-section></q-card
     ></q-dialog>
+
+    <!-- team leave dialog -->
+    <q-dialog v-model="matchLeaveModal"
+      ><q-card class="bg-primary"
+        ><q-card-section
+          ><div class="text-subtitle1 text-warning">
+            Are you sure you want to leave? All progress will be deleted!
+          </div>
+          <div class="q-pa-md text-warning justify-center row">
+            <q-btn
+              label="Confirm"
+              class="bg-positive"
+              @click="matchLeaveModal = false"
+              :to="'/play'"
+              flat
+              dense
+            /></div></q-card-section></q-card
+    ></q-dialog>
   </q-page>
 </template>
 
@@ -264,17 +281,17 @@ const {
   teamUpdate,
   teamList,
   teamLoading,
-  teamOptions,
   playerList,
   teamModal,
   teamUpdateModal,
   teamDeleteModal,
-  optionsModel,
+  matchLeaveModal,
 } = storeToRefs(matchStore);
 const {
   openTeamUpdateModal,
   openTeamModal,
   openTeamDeleteModal,
+  openLeaveModal,
   createTeam,
   deleteTeam,
   updateTeam,
@@ -285,25 +302,9 @@ const {
 
 const teams = teamList;
 
-// const populateOptions = () => {
-//   options.value = teamList.value.map((team) => ({
-//     label: team.data.name,
-//     value: team.id, // Assuming each team has an 'id' field
-//   }));
-// };
-
 onMounted(() => {
   joinMatch();
   loadTeams();
-
-  // teamList.value.map((team) => {
-  //   console.log(team.id);
-  //   console.log(team.data.name);
-  // });
-});
-watch(() => {
-  optionsModel;
-  teamOptions;
 });
 </script>
 
