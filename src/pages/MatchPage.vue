@@ -48,22 +48,39 @@
                 ><img src="https://cdn.quasar.dev/img/avatar.png"
               /></q-avatar>
               <span class="text-bold q-ml-md"></span>
-              {{ playerList.team }}
+              {{ playerList.name }}
               <div v-if="playerList" class="row justify-center">
-                <div class="col-12 text-center">{{ playerList.player1 }}</div>
-                <div class="col-12 text-center">{{ playerList.player2 }}</div>
-                <div class="col-12 text-center">{{ playerList.player3 }}</div>
-                <div class="col-12 text-center">{{ playerList.player4 }}</div>
-                <div class="col-12 text-center">{{ playerList.player5 }}</div>
+                <div class="col-12 text-center">{{ playerList.member1 }}</div>
+                <div class="col-12 text-center">{{ playerList.member2 }}</div>
+                <div class="col-12 text-center">{{ playerList.member3 }}</div>
+                <div class="col-12 text-center">{{ playerList.member4 }}</div>
+                <div class="col-12 text-center">{{ playerList.member5 }}</div>
               </div>
             </div>
             <div class="col text-center text-h4">VS</div>
-            <div class="col text-right">
+            <div class="col">
               <q-avatar
                 ><img src="https://cdn.quasar.dev/img/avatar.png"
               /></q-avatar>
               <span class="text-bold q-ml-md"></span>
-              Team B
+              {{ challengerList.name }}
+              <div v-if="challengerList" class="row justify-center">
+                <div class="col-12 text-center">
+                  {{ challengerList.member1 }}
+                </div>
+                <div class="col-12 text-center">
+                  {{ challengerList.member2 }}
+                </div>
+                <div class="col-12 text-center">
+                  {{ challengerList.member3 }}
+                </div>
+                <div class="col-12 text-center">
+                  {{ challengerList.member4 }}
+                </div>
+                <div class="col-12 text-center">
+                  {{ challengerList.member5 }}
+                </div>
+              </div>
             </div>
           </div>
         </q-card-section>
@@ -80,7 +97,7 @@
       </q-card>
     </div>
     <!-- my teams -->
-    <div class="q-pa-md">
+    <div class="q-pa-sm">
       <div class="text-warning text-bold bg-primary text-center">My Teams</div>
       <div class="row q-pa-sm text-warning">
         <div class="row q-pa-sm" v-for="team in teams" :key="team.id">
@@ -134,6 +151,68 @@
       </div>
     </div>
 
+    <!-- challenger team -->
+    <!-- <div v-show="isChallenger" class="q-pa-sm">
+      <div class="text-warning text-bold bg-primary text-center">My Teams</div>
+      <div class="row q-pa-sm text-warning">
+        <div
+          class="row q-pa-sm"
+          v-for="challenger in challengers"
+          :key="challenger.id"
+        >
+          <q-card class="bg-primary" style="width: 100%; max-width: 300px">
+            <q-card-section
+              ><div class="row text-bold">
+                <div class="col-10">{{ challenger.data.name }}</div>
+                <div class="col q-gutter-sm">
+                  <q-btn flat dense size="sm" class="bg-gray"
+                    ><q-icon
+                      name="edit"
+                      @click="openTeamUpdateModal(challenger.id)"
+                  /></q-btn>
+                  <q-btn flat dense size="sm" class="bg-red"
+                    ><q-icon
+                      name="delete"
+                      @click="openTeamDeleteModal(challenger.id)"
+                  /></q-btn>
+                </div></div
+            ></q-card-section>
+            <q-separator />
+            <q-card-section>
+              <div class="row">
+                <div class="col">
+                  <span class="text-positive">Wins:</span>
+                  {{ challenger.data.wins }}
+                </div>
+                <div class="col">
+                  <span class="text-red">Loss:</span> {{ challenger.data.loss }}
+                </div>
+              </div></q-card-section
+            >
+            <q-separator />
+            <q-card-section>
+              <div class="row text-overline">Players:</div>
+              <div class="col">
+                <li>{{ challenger.data.member1 }}</li>
+                <li>{{ challenger.data.member2 }}</li>
+                <li>{{ challenger.data.member3 }}</li>
+                <li>{{ challenger.data.member4 }}</li>
+                <li>{{ challenger.data.member5 }}</li>
+              </div>
+              <div class="q-pa-sm">
+                <q-btn
+                  flat
+                  dense
+                  label="Play with this team"
+                  class="bg-green"
+                  size="sm"
+                  @click="setTeam(challenger.id)"
+                /></div></q-card-section
+          ></q-card>
+        </div>
+      </div>
+    </div> -->
+
     <!-- challenge requests dialog -->
     <q-dialog v-model="challengeRequestsModal"
       ><q-card class="bg-primary" style="width: 100%">
@@ -154,20 +233,20 @@
               <span> wants to challenge!</span>
             </div>
             <div class="row q-gutter-sm justify-right">
-              <q-btn flat dense class="bg-positive" size="sm"
+              <q-btn
+                flat
+                dense
+                class="bg-positive"
+                size="sm"
+                @click="acceptRequest(request.id)"
                 ><q-icon name="check"
               /></q-btn>
               <q-btn flat dense class="bg-red" size="sm"
                 ><q-icon name="close"
               /></q-btn>
             </div>
-          </div>
-          <!-- <ul v-for="request in requests" :key="request.id">
-            <li>{{ request.challenger }}</li>
-          </ul> -->
-        </q-card-section></q-card
-      ></q-dialog
-    >
+          </div> </q-card-section></q-card
+    ></q-dialog>
     <!-- team create dialog -->
     <q-dialog v-model="teamModal"
       ><q-card class="bg-primary q-pa-md text-warning" style="width: 100%"
@@ -339,6 +418,10 @@ const {
   teamDeleteModal,
   matchLeaveModal,
   challengeRequestsModal,
+  challengerTeamList,
+  challengerList,
+  isHost,
+  isChallenger,
 } = storeToRefs(matchStore);
 const {
   openTeamUpdateModal,
@@ -352,11 +435,12 @@ const {
   setTeam,
   joinMatch,
   loadTeams,
+  acceptRequest,
 } = matchStore;
 
 const teams = teamList;
 const requests = requestList;
-
+const challengers = challengerTeamList;
 onMounted(() => {
   joinMatch();
   loadTeams();
