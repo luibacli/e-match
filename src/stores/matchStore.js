@@ -11,6 +11,7 @@ import {
   where,
   query,
   arrayUnion,
+  deleteDoc,
 } from "firebase/firestore";
 import { db } from "src/boot/firebase";
 import { ref } from "vue";
@@ -57,7 +58,16 @@ export const useMatchStore = defineStore("match", {
       timestamp: "",
       userRef: "",
     }),
+    teamUpdate: ref({
+      name: "",
+      member1: "",
+      member2: "",
+      member3: "",
+      member4: "",
+      member5: "",
+    }),
     teamOptions: ref([]),
+    optionsModel: ref(null),
     // teamList: ref({
     //   id: "",
     //   name: "",
@@ -67,11 +77,15 @@ export const useMatchStore = defineStore("match", {
     //   member4: "",
     //   member5: "",
     // }),
+    teamId: ref(""),
     teamList: ref([]),
     teamOptions: ref({}),
     teamModal: ref(false),
+    teamUpdateModal: ref(false),
+    teamDeleteModal: ref(false),
     teamLoading: ref(false),
     playerList: ref({
+      team: "",
       player1: "",
       player2: "",
       player3: "",
@@ -383,7 +397,8 @@ export const useMatchStore = defineStore("match", {
       this.matchData.status = data.status;
       console.log("match data", this.matchData);
     },
-    async loadTeam() {
+    async loadTeams() {
+      this.teamLoading = true;
       const q = query(
         collection(db, "teams"),
         where("userRef", "==", this.playerId)
@@ -406,21 +421,28 @@ export const useMatchStore = defineStore("match", {
         });
       });
       this.teamOptions = optionData;
+      this.teamLoading = false;
 
       console.log("options", this.teamOptions);
     },
     async setTeam(teamId) {
-      const docRef = doc(db, "teams", teamId);
+      if (teamId) {
+        const docRef = doc(db, "teams", teamId);
 
-      const docSnap = await getDoc(docRef);
-      const data = docSnap.data();
-      this.playerList.player1 = data.member1;
-      this.playerList.player2 = data.member2;
-      this.playerList.player3 = data.member3;
-      this.playerList.player4 = data.member4;
-      this.playerList.player5 = data.member5;
+        const docSnap = await getDoc(docRef);
+        const data = docSnap.data();
+        this.playerList.team = data.name;
+        this.playerList.player1 = data.member1;
+        this.playerList.player2 = data.member2;
+        this.playerList.player3 = data.member3;
+        this.playerList.player4 = data.member4;
+        this.playerList.player5 = data.member5;
+      } else {
+        this.clearPlayers();
+      }
     },
     async createTeam() {
+      this.teamLoading = true;
       const docData = {
         name: this.teamData.name,
         member1: this.teamData.member1,
@@ -439,8 +461,36 @@ export const useMatchStore = defineStore("match", {
       await addDoc(teamRef, docData);
 
       this.clearTeamData();
+      await this.loadTeams();
+      this.optionsModel = "";
       this.teamModal = false;
+      this.teamLoading = false;
       console.log("team Data", docData);
+    },
+    async updateTeam() {
+      this.openTeamUpdateModal = false;
+      const docData = {
+        name: this.teamUpdate.name,
+        member1: this.teamUpdate.member1,
+        member2: this.teamUpdate.member2,
+        member3: this.teamUpdate.member3,
+        member4: this.teamUpdate.member4,
+        member5: this.teamUpdate.member5,
+      };
+      const docRef = doc(db, "teams", this.teamId);
+      await updateDoc(docRef, docData);
+      this.playerList = { ...docData };
+      this.optionsModel = "";
+      await this.setTeam(this.teamId);
+      await this.loadTeams();
+    },
+    async deleteTeam() {
+      await deleteDoc(doc(db, "teams", this.teamId));
+      this.optionsModel = "";
+      await this.loadTeams();
+      await this.setTeam();
+
+      this.teamDeleteModal = false;
     },
     async createMatch() {
       this.tableLoading = true;
@@ -492,7 +542,22 @@ export const useMatchStore = defineStore("match", {
     openTeamModal() {
       this.teamModal = true;
     },
+    openTeamUpdateModal(id) {
+      this.teamId = id;
+      this.teamUpdate.name = this.playerList.team;
+      this.teamUpdate.member1 = this.playerList.player1;
+      this.teamUpdate.member2 = this.playerList.player2;
+      this.teamUpdate.member3 = this.playerList.player3;
+      this.teamUpdate.member4 = this.playerList.player4;
+      this.teamUpdate.member5 = this.playerList.player5;
+      this.teamUpdateModal = true;
+    },
+    openTeamDeleteModal(id) {
+      this.teamId = id;
+      this.teamDeleteModal = true;
+    },
     clearPlayers() {
+      this.playerList.team = "";
       this.playerList.player1 = "";
       this.playerList.player2 = "";
       this.playerList.player3 = "";
