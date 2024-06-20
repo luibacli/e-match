@@ -35,18 +35,30 @@ export const useMatchStore = defineStore("match", {
     matchData: ref({
       id: "",
       host: "",
+      challenger: "",
       game: "",
       type: "",
-      bet: 0,
+      bet: "",
+      acceptedId: [],
+      gameLobbyId: "",
+      hosts: [],
+      challengers: [],
+      gameLobbyHosts: [],
+      gameLobbyChallengers: [],
+      requests: [],
+      gameTime: "",
       winner: "",
       status: "",
       timestamp: "",
     }),
+    accepted: ref([]),
     userId: ref(""),
     matchId: ref(""),
+    hostName: ref(""),
     storedName: ref(""),
     gameName: ref(""),
     matchList: ref([]),
+    requestList: ref([]),
     teamData: ref({
       id: "",
       name: "",
@@ -75,6 +87,8 @@ export const useMatchStore = defineStore("match", {
     teamUpdateModal: ref(false),
     teamDeleteModal: ref(false),
     matchLeaveModal: ref(false),
+    challengeModal: ref(false),
+    challengeRequestsModal: ref(false),
     teamLoading: ref(false),
     playerList: ref({
       team: "",
@@ -84,6 +98,7 @@ export const useMatchStore = defineStore("match", {
       player4: "",
       player5: "",
     }),
+    challengerData: ref({}),
 
     tableLoading: ref(false),
     isOpen: ref(false),
@@ -126,8 +141,20 @@ export const useMatchStore = defineStore("match", {
     playerId: () => {
       return authStore.user.id;
     },
+    playerName: () => {
+      return authStore.user.name;
+    },
     host: () => {
       return authStore.user.name;
+    },
+    isHost: () => {
+      return authStore.userData.isHost;
+    },
+    isChallenger: () => {
+      return authStore.userData.isChallenger;
+    },
+    acceptedPlayers: (state) => {
+      return state.matchData.acceptedId;
     },
   },
   actions: {
@@ -377,20 +404,25 @@ export const useMatchStore = defineStore("match", {
       const docSnap = await getDoc(docRef);
       console.log("data", docSnap.data());
     },
-    async getMatch() {},
+
     async joinMatch() {
       const docRef = doc(db, "matches", this.routeMatch);
-
       const docSnap = await getDoc(docRef);
+      const matchRequest = [];
       const data = docSnap.data();
-      this.matchData.id = data.id;
-      this.matchData.game = data.game;
-      this.matchData.bet = data.bet;
-      this.matchData.host = data.host;
-      this.matchData.type = data.type;
-      this.matchData.winner = data.winner;
-      this.matchData.status = data.status;
-      console.log("match data", this.matchData);
+      this.matchData = { ...data };
+      this.requestList = data.requests;
+
+      if (this.isHost) {
+        console.log("yes you are host");
+      } else {
+        console.log("you are not the host");
+      }
+      if (this.isChallenger) {
+        console.log("yes you are challenger");
+      } else {
+        console.log("you are not the challenger");
+      }
     },
     async loadTeams() {
       this.teamLoading = true;
@@ -411,6 +443,7 @@ export const useMatchStore = defineStore("match", {
 
       this.teamLoading = false;
     },
+
     async setTeam(teamId) {
       if (teamId) {
         const docRef = doc(db, "teams", teamId);
@@ -497,29 +530,56 @@ export const useMatchStore = defineStore("match", {
 
       const newMatchId = matchCounter.toString();
 
-      if (this.hostt) {
-        this.storedName = getHost;
+      if (this.host) {
+        this.storedName = this.host;
       } else {
         console.log("no display name found");
       }
 
       const docData = {
         id: `${newMatchId}`,
-        host: getHost,
+        host: this.host,
+        challenger: "",
         game: this.match.game,
         type: this.match.type,
         bet: this.match.bet,
+        acceptedId: [`${this.playerId}`],
+        gameLobbyId: "",
+        hosts: [],
+        challengers: [],
+        gameLobbyHosts: [],
+        gameLobbyChallengers: [],
+        requests: [],
+        gameTime: "",
         winner: "Pending",
         status: "Open",
         timestamp: serverTimestamp(),
       };
       this.matchId = docData.id;
-      console.log(this.matchId);
       await setDoc(doc(db, "matches", newMatchId), docData);
+      const userRef = doc(db, "users", this.playerId);
+      await updateDoc(userRef, { isHost: true });
       this.router.push(`/play/${this.matchId}`);
 
       this.isOpen = false;
       this.tableLoading = false;
+    },
+    async matchRequest() {
+      if (!this.isChallenger && !this.isHost) {
+        const docRef = doc(db, "matches", this.matchId);
+
+        await updateDoc(docRef, {
+          requests: arrayUnion({
+            id: this.playerId,
+            challenger: this.playerName,
+          }),
+        });
+
+        console.log("Request sent");
+        this.challengeModal = false;
+      } else {
+        console.log("You are still in a lobby, please leave first!");
+      }
     },
 
     openModal() {
@@ -530,6 +590,9 @@ export const useMatchStore = defineStore("match", {
     },
     openLeaveModal() {
       this.matchLeaveModal = true;
+    },
+    openChallengeRequestsModal() {
+      this.challengeRequestsModal = true;
     },
     async openTeamUpdateModal(id) {
       this.teamId = id;
@@ -548,6 +611,31 @@ export const useMatchStore = defineStore("match", {
     openTeamDeleteModal(id) {
       this.teamId = id;
       this.teamDeleteModal = true;
+    },
+    async openChallengeModal(id, host) {
+      // const data = this.acceptedPlayers;
+      // console.log("data", data);
+      // const accepted = data.includes(this.playerId);
+      try {
+        const docRef = doc(db, "matches", id);
+        const docSnap = await getDoc(docRef);
+        const data = docSnap.data();
+        const acceptedData = data.acceptedId;
+        const accepted = acceptedData.includes(this.playerId);
+        if (accepted) {
+          this.router.push(`/play/${id}`);
+        } else {
+          this.matchId = id;
+          this.hostName = host;
+          this.challengeModal = true;
+        }
+      } catch (error) {
+        console.error("Error checking documents");
+      }
+
+      // this.matchId = id;
+      // this.hostName = host;
+      // this.challengeModal = true;
     },
     clearPlayers() {
       this.playerList.team = "";

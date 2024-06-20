@@ -9,6 +9,7 @@ import {
 } from "firebase/auth";
 import { setDoc, doc, serverTimestamp, getDoc } from "firebase/firestore";
 import { ref } from "vue";
+
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     formData: ref({
@@ -33,7 +34,19 @@ export const useAuthStore = defineStore("auth", {
       id: "",
       name: "",
     }),
-    userData: ref({}),
+    userData: ref({
+      displayName: "",
+      email: "",
+      phoneNumber: "",
+      password: "",
+      balance: 0,
+      wins: 0,
+      loss: 0,
+      isAdmin: false,
+      isHost: false,
+      isChallenger: false,
+      isAccepted: false,
+    }),
     profileName: ref(""),
     showLogin: ref(false),
     isOpen: false,
@@ -100,7 +113,17 @@ export const useAuthStore = defineStore("auth", {
       const docRef = doc(db, "users", this.user.id);
       const docSnap = await getDoc(docRef);
       const data = docSnap.data();
-      this.userData = { ...data };
+      this.userData.displayName = data.displayName;
+      this.userData.balance = data.balance;
+      this.userData.wins = data.wins;
+      this.userData.loss = data.loss;
+      this.userData.phoneNumber = data.phoneNumber;
+      this.userData.isAccepted = data.isAccepted;
+      this.userData.isHost = data.isHost;
+      this.userData.isChallenger = data.isChallenger;
+      this.userData.isAdmin = data.isAdmin;
+
+      console.log(this.userData);
     },
     async logout() {
       await signOut(auth);

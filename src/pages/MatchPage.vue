@@ -4,6 +4,11 @@
   </div>
   <q-page v-else>
     <div class="row justify-center">
+      <!-- <div>
+        <ul v-for="request in requests" :key="request.id">
+          <li>{{ request.challenger }} has sent you a challenge request</li>
+        </ul>
+      </div> -->
       <div class="q-ma-md q-pa-sm bg-warning" style="width: 450px">
         <span class="text-red text-bold">Note:</span> Please make sure all
         players name match in the current game!
@@ -12,6 +17,17 @@
 
     <div class="row justify-center">
       <q-card class="bg-warning q-pa-md" style="width: 100%; max-width: 1000px">
+        <div class="row bg-secondary text-yellow">
+          <q-btn
+            flat
+            dense
+            size="md"
+            label="Waiting for Request"
+            class="text-warning"
+            @click="openChallengeRequestsModal"
+            ><span class="text-yellow"><q-icon name="notifications" /></span
+          ></q-btn>
+        </div>
         <q-card-section
           horizontal
           class="row justify-between bg-primary text-warning text-h5"
@@ -66,8 +82,8 @@
     <!-- my teams -->
     <div class="q-pa-md">
       <div class="text-warning text-bold bg-primary text-center">My Teams</div>
-      <div class="row q-pa-md text-warning">
-        <div class="q-pa-md" v-for="team in teams" :key="team.id">
+      <div class="row q-pa-sm text-warning">
+        <div class="row q-pa-sm" v-for="team in teams" :key="team.id">
           <q-card class="bg-primary" style="width: 100%; max-width: 300px">
             <q-card-section
               ><div class="row text-bold">
@@ -117,6 +133,41 @@
         </div>
       </div>
     </div>
+
+    <!-- challenge requests dialog -->
+    <q-dialog v-model="challengeRequestsModal"
+      ><q-card class="bg-primary" style="width: 100%">
+        <q-card-section
+          ><div class="text-center text-warning text-bold text-subtitle2">
+            Challenge Requests:
+          </div>
+          <q-separator />
+        </q-card-section>
+        <q-card-section class="bg-warning">
+          <div
+            class="row q-pa-sm"
+            v-for="request in requests"
+            :key="request.id"
+          >
+            <div class="col">
+              <span class="text-red">{{ request.challenger }}</span>
+              <span> wants to challenge!</span>
+            </div>
+            <div class="row q-gutter-sm justify-right">
+              <q-btn flat dense class="bg-positive" size="sm"
+                ><q-icon name="check"
+              /></q-btn>
+              <q-btn flat dense class="bg-red" size="sm"
+                ><q-icon name="close"
+              /></q-btn>
+            </div>
+          </div>
+          <!-- <ul v-for="request in requests" :key="request.id">
+            <li>{{ request.challenger }}</li>
+          </ul> -->
+        </q-card-section></q-card
+      ></q-dialog
+    >
     <!-- team create dialog -->
     <q-dialog v-model="teamModal"
       ><q-card class="bg-primary q-pa-md text-warning" style="width: 100%"
@@ -277,6 +328,7 @@ import { storeToRefs } from "pinia";
 const matchStore = useMatchStore();
 const {
   matchData,
+  requestList,
   teamData,
   teamUpdate,
   teamList,
@@ -286,12 +338,14 @@ const {
   teamUpdateModal,
   teamDeleteModal,
   matchLeaveModal,
+  challengeRequestsModal,
 } = storeToRefs(matchStore);
 const {
   openTeamUpdateModal,
   openTeamModal,
   openTeamDeleteModal,
   openLeaveModal,
+  openChallengeRequestsModal,
   createTeam,
   deleteTeam,
   updateTeam,
@@ -301,11 +355,21 @@ const {
 } = matchStore;
 
 const teams = teamList;
+const requests = requestList;
 
 onMounted(() => {
   joinMatch();
   loadTeams();
 });
+
+watch(() => {
+  requestList;
+});
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.request {
+  border-bottom-color: aqua;
+  border-bottom: 100px;
+}
+</style>
