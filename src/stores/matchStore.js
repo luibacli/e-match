@@ -13,18 +13,23 @@ import {
   arrayUnion,
   deleteDoc,
   arrayRemove,
+  onSnapshot,
 } from "firebase/firestore";
 import { db } from "src/boot/firebase";
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "./authStore";
 import { route } from "quasar/wrappers";
+import { Notify } from "quasar";
+import { useQuasar } from "quasar";
+
+const $q = useQuasar();
 
 const authStore = useAuthStore();
 
 export const useMatchStore = defineStore("match", {
   state: () => ({
-    match: ref({
+    match: {
       id: "",
       host: "",
       game: "",
@@ -33,48 +38,36 @@ export const useMatchStore = defineStore("match", {
       winner: "",
       status: "",
       timestamp: "",
-    }),
-    matchData: ref({
-      id: "",
-      host: "",
-      challenger: "",
-      game: "",
-      type: "",
-      bet: "",
-      acceptedId: [],
-      gameLobbyId: "",
-      hosts: [],
-      challengers: [],
-      gameLobbyHosts: [],
-      gameLobbyChallengers: [],
-      requests: [],
-      gameTime: "",
-      winner: "",
-      status: "",
-      timestamp: "",
-    }),
-    accepted: ref([]),
-    userId: ref(""),
-    matchId: ref(""),
-    hostName: ref(""),
-    storedName: ref(""),
-    gameName: ref(""),
-    matchList: ref([]),
-    requestList: ref([]),
-    teamData: ref({
-      id: "",
-      name: "",
-      member1: "",
-      member2: "",
-      member3: "",
-      member4: "",
-      member5: "",
-      wins: 0,
-      loss: 0,
-      timestamp: "",
-      userRef: "",
-    }),
-    challengerTeamData: ref({
+    },
+    // matchData: {
+    //   id: "",
+    //   host: "",
+    //   challenger: "",
+    //   game: "",
+    //   type: "",
+    //   bet: "",
+    //   acceptedId: [],
+    //   gameLobbyId: "",
+    //   hosts: [],
+    //   challengers: [],
+    //   gameLobbyHosts: [],
+    //   gameLobbyChallengers: [],
+    //   requests: [],
+    //   gameTime: "",
+    //   winner: "",
+    //   status: "",
+    //   timestamp: "",
+    // },
+    matchData: {},
+    accepted: [],
+    userId: "",
+    matchId: "",
+    hostName: "",
+    storedName: "",
+    gameName: "",
+    matchList: [],
+    requestList: [],
+    teamData: {
       id: "",
       name: "",
       member1: "",
@@ -86,47 +79,66 @@ export const useMatchStore = defineStore("match", {
       loss: 0,
       timestamp: "",
       userRef: "",
-    }),
-    challengerTeamList: ref([]),
-
-    teamUpdate: ref({
+    },
+    challengerTeamData: {
+      id: "",
       name: "",
       member1: "",
       member2: "",
       member3: "",
       member4: "",
       member5: "",
-    }),
-    teamId: ref(""),
-    teamList: ref([]),
-    teamOptions: ref({}),
-    teamModal: ref(false),
-    teamUpdateModal: ref(false),
-    teamDeleteModal: ref(false),
-    matchLeaveModal: ref(false),
-    challengeModal: ref(false),
-    challengeRequestsModal: ref(false),
-    teamLoading: ref(false),
-    playerList: ref({
-      team: "",
-      player1: "",
-      player2: "",
-      player3: "",
-      player4: "",
-      player5: "",
-    }),
-    challengerList: ref({
-      team: "",
-      player1: "",
-      player2: "",
-      player3: "",
-      player4: "",
-      player5: "",
-    }),
-    challengerData: ref({}),
+      wins: 0,
+      loss: 0,
+      timestamp: "",
+      userRef: "",
+    },
+    challengerTeamList: [],
 
-    tableLoading: ref(false),
-    isOpen: ref(false),
+    teamUpdate: {
+      name: "",
+      member1: "",
+      member2: "",
+      member3: "",
+      member4: "",
+      member5: "",
+    },
+    teamId: "",
+    teamList: [],
+    teamModal: false,
+    teamUpdateModal: false,
+    teamDeleteModal: false,
+    matchLeaveModal: false,
+    challengeModal: false,
+    challengeRequestsModal: false,
+    teamLoading: false,
+    // playerList: ref({
+    //   team: "",
+    //   player1: "",
+    //   player2: "",
+    //   player3: "",
+    //   player4: "",
+    //   player5: "",
+    //   wins: 0,
+    //   loss: 0,
+    // }),
+    playerList: {},
+
+    // challengerList: ref({
+    //   team: "",
+    //   player1: "",
+    //   player2: "",
+    //   player3: "",
+    //   player4: "",
+    //   player5: "",
+    //   wins: 0,
+    //   loss: 0,
+    // }),
+    challengerList: {},
+    challengerData: {},
+
+    tableLoading: false,
+    isOpen: false,
   }),
   getters: {
     routeMatch: () => {
@@ -407,11 +419,7 @@ export const useMatchStore = defineStore("match", {
 
       const data = docSnap.data();
       this.matchData = { ...data };
-      this.requestList = data.requests;
-      const hostTeam = data.hosts;
-      const challengerTeam = data.challengers;
-      this.playerList = { ...hostTeam };
-      this.challengerList = { ...challengerTeam };
+
       if (this.isHost) {
         console.log("yes you are host");
       } else {
@@ -436,6 +444,10 @@ export const useMatchStore = defineStore("match", {
         });
 
         console.log("Request sent");
+        Notify.create({
+          color: "positive",
+          message: "Request sent!",
+        });
         this.challengeModal = false;
       } else {
         console.log("You are still in a lobby, please leave first!");
@@ -454,7 +466,69 @@ export const useMatchStore = defineStore("match", {
         this.challengeRequestsModal = false;
         console.log("User Accepted");
       } catch (error) {
-        console.error("Error accepting the player");
+        console.error(error);
+      }
+    },
+    async confirmLeave() {
+      try {
+        const docRef = doc(db, "users", this.playerId);
+
+        if (this.isHost) {
+          await updateDoc(docRef, {
+            isHost: false,
+          });
+          console.log("You are now leaving as host");
+        }
+        if (this.isChallenger) {
+          await updateDoc(docRef, {
+            isChallenger: false,
+          });
+          console.log("You are now leaving as challenger");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    realTimeMatch() {
+      this.teamLoading = true;
+      try {
+        const unsub = onSnapshot(
+          doc(db, "matches", this.routeMatch),
+          // {
+          //   includeMetadataChanges: true,
+          //   source: "cache",
+          // },
+          (docSnapShot) => {
+            const data = docSnapShot.data();
+            if (data) {
+              this.matchData = data || {};
+              this.playerList = data.hosts || {};
+              this.challengerList = data.challengers || {};
+              this.requestList = data.requests || [];
+            } else {
+              console.log("No Data Found");
+            }
+          },
+
+          (error) => {
+            Notify.create({
+              color: "negative",
+              message: error.message,
+            });
+          }
+        );
+        this.unsubscribeRealTimeMatch = unsub;
+        this.teamLoading = false;
+      } catch (error) {
+        Notify.create({
+          color: "negative",
+          message: error.message,
+        });
+      }
+    },
+    unsubscribeRealTimeMatch() {
+      if (this.unsubscribeRealTimeMatch) {
+        this.unsubscribeRealTimeMatch();
       }
     },
 
@@ -478,7 +552,10 @@ export const useMatchStore = defineStore("match", {
 
         this.teamLoading = false;
       } catch (error) {
-        console.error("Error querying team data");
+        Notify.create({
+          color: "negative",
+          message: error.message,
+        });
       }
     },
     async setTeam(teamId) {
@@ -500,11 +577,11 @@ export const useMatchStore = defineStore("match", {
         } else {
           console.log("Not a challenger nor a host");
         }
-        await this.joinMatch();
-        // console.log("host team", this.playerList);
-        // console.log("challenger team", this.challengerList);
       } catch (error) {
-        console.error(error);
+        Notify.create({
+          color: "negative",
+          message: error.message,
+        });
       }
     },
     async createTeam() {
@@ -560,55 +637,67 @@ export const useMatchStore = defineStore("match", {
     },
     async createMatch() {
       this.tableLoading = true;
-      const counterRef = doc(db, "counters", "matchCounter");
 
-      const counterDoc = await getDoc(counterRef);
+      try {
+        if (!this.isHost && !this.isChallenger) {
+          const counterRef = doc(db, "counters", "matchCounter");
 
-      if (!counterDoc.exists) {
-        throw new Error("Counter document does not exist!");
+          const counterDoc = await getDoc(counterRef);
+
+          if (!counterDoc.exists) {
+            throw new Error("Counter document does not exist!");
+          }
+
+          let matchCounter = counterDoc.data().counter;
+
+          matchCounter += 1;
+
+          await updateDoc(counterRef, { counter: matchCounter });
+
+          const newMatchId = matchCounter.toString();
+
+          if (this.host) {
+            this.storedName = this.host;
+          } else {
+            console.log("no display name found");
+          }
+
+          const docData = {
+            id: `${newMatchId}`,
+            host: this.host,
+            challenger: "",
+            game: this.match.game,
+            type: this.match.type,
+            bet: this.match.bet,
+            acceptedId: [`${this.playerId}`],
+            gameLobbyId: "",
+            hosts: [],
+            challengers: [],
+            gameLobbyHosts: [],
+            gameLobbyChallengers: [],
+            requests: [],
+            gameTime: "",
+            winner: "Pending",
+            status: "Open",
+            timestamp: serverTimestamp(),
+          };
+          this.matchId = docData.id;
+          await setDoc(doc(db, "matches", newMatchId), docData);
+          const userRef = doc(db, "users", this.playerId);
+          await updateDoc(userRef, { isHost: true });
+          this.router.push(`/play/${this.matchId}`);
+
+          this.isOpen = false;
+          this.tableLoading = false;
+        } else {
+          $q.notify({
+            type: "negative",
+            message: 'This is a "negative" type notification.',
+          });
+        }
+      } catch (error) {
+        console.error(error);
       }
-
-      let matchCounter = counterDoc.data().counter;
-
-      matchCounter += 1;
-
-      await updateDoc(counterRef, { counter: matchCounter });
-
-      const newMatchId = matchCounter.toString();
-
-      if (this.host) {
-        this.storedName = this.host;
-      } else {
-        console.log("no display name found");
-      }
-
-      const docData = {
-        id: `${newMatchId}`,
-        host: this.host,
-        challenger: "",
-        game: this.match.game,
-        type: this.match.type,
-        bet: this.match.bet,
-        acceptedId: [`${this.playerId}`],
-        gameLobbyId: "",
-        hosts: [],
-        challengers: [],
-        gameLobbyHosts: [],
-        gameLobbyChallengers: [],
-        requests: [],
-        gameTime: "",
-        winner: "Pending",
-        status: "Open",
-        timestamp: serverTimestamp(),
-      };
-      this.matchId = docData.id;
-      await setDoc(doc(db, "matches", newMatchId), docData);
-      const userRef = doc(db, "users", this.playerId);
-      await updateDoc(userRef, { isHost: true });
-      this.router.push(`/play/${this.matchId}`);
-
-      this.isOpen = false;
-      this.tableLoading = false;
     },
 
     openModal() {
@@ -642,16 +731,19 @@ export const useMatchStore = defineStore("match", {
       this.teamDeleteModal = true;
     },
     async openChallengeModal(id, host) {
-      // const data = this.acceptedPlayers;
-      // console.log("data", data);
-      // const accepted = data.includes(this.playerId);
       try {
         const docRef = doc(db, "matches", id);
+        const userRef = doc(db, "users", this.playerId);
         const docSnap = await getDoc(docRef);
         const data = docSnap.data();
         const acceptedData = data.acceptedId;
         const accepted = acceptedData.includes(this.playerId);
-        if (accepted) {
+        if (accepted && this.isHost) {
+          this.router.push(`/play/${id}`);
+        } else if (accepted && !this.isHost) {
+          await updateDoc(userRef, {
+            isChallenger: true,
+          });
           this.router.push(`/play/${id}`);
         } else {
           this.matchId = id;
@@ -659,7 +751,10 @@ export const useMatchStore = defineStore("match", {
           this.challengeModal = true;
         }
       } catch (error) {
-        console.error("Error checking documents");
+        Notify.create({
+          color: "negative",
+          message: error.message,
+        });
       }
 
       // this.matchId = id;
@@ -682,6 +777,13 @@ export const useMatchStore = defineStore("match", {
       this.teamData.member3 = "";
       this.teamData.member4 = "";
       this.teamData.member5 = "";
+    },
+    matchRefresh() {
+      if (!this.teamLoading) {
+        this.teamLoading = true;
+        this.teamLoading = false;
+      }
+      console.log(this.teamLoading);
     },
   },
 });

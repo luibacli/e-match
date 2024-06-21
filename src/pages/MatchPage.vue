@@ -3,6 +3,7 @@
     Loading....
   </div>
   <q-page v-else>
+    <q-btn icon="refresh" class="bg-grey" @click="realTimeMatch" />
     <div class="row justify-center">
       <!-- <div>
         <ul v-for="request in requests" :key="request.id">
@@ -92,7 +93,16 @@
             class="bg-grey text-warning"
             @click="openLeaveModal"
           />
-          <q-btn label="Start!" class="bg-positive text-warning" />
+          <q-btn
+            v-show="isHost"
+            label="Start!"
+            class="bg-positive text-warning"
+          />
+          <q-btn
+            v-show="isChallenger"
+            label="Ready!"
+            class="bg-positive text-warning"
+          />
         </q-card-section>
       </q-card>
     </div>
@@ -391,7 +401,7 @@
             <q-btn
               label="Confirm"
               class="bg-positive"
-              @click="matchLeaveModal = false"
+              @click="confirmLeave"
               :to="'/play'"
               flat
               dense
@@ -402,7 +412,7 @@
 
 <script setup>
 import { useMatchStore } from "src/stores/matchStore";
-import { onMounted, watch } from "vue";
+import { onMounted, onBeforeUnmount } from "vue";
 import { storeToRefs } from "pinia";
 const matchStore = useMatchStore();
 const {
@@ -436,19 +446,26 @@ const {
   joinMatch,
   loadTeams,
   acceptRequest,
+  confirmLeave,
+  realTimeMatch,
+  unsubscribeRealTimeMatch,
 } = matchStore;
 
 const teams = teamList;
 const requests = requestList;
 const challengers = challengerTeamList;
+
 onMounted(() => {
-  joinMatch();
   loadTeams();
+  realTimeMatch();
 });
 
-watch(() => {
-  requestList;
+onBeforeUnmount(() => {
+  unsubscribeRealTimeMatch();
 });
+// onBeforeMount(() => {
+//   unsubscribeRealTimeMatch();
+// });
 </script>
 
 <style lang="scss" scoped>

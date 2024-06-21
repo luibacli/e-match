@@ -9,6 +9,13 @@
         <q-tabs>
           <q-tab label="Play" @click="store.btnPlay" />
           <q-tab label="Ranks" :to="'/ranks'" />
+          <div
+            class="row bg-warning q-mr-sm rounded-borders text-secondary"
+            style="width: 100px"
+          >
+            <div class="col-2 q-ml-sm"><q-icon name="payments" /></div>
+            <div class="col-8 text-bold">1,000,000</div>
+          </div>
           <q-tab
             v-if="!isAuthenticated"
             label="Login"
