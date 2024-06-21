@@ -7,7 +7,7 @@
         ></q-btn>
 
         <q-tabs>
-          <q-tab label="Play" @click="store.btnPlay" />
+          <q-tab label="Play" @click="btnPlay" />
           <q-tab label="Ranks" :to="'/ranks'" />
           <div
             class="row bg-warning q-mr-sm rounded-borders text-secondary"
@@ -16,18 +16,14 @@
             <div class="col-2 q-ml-sm"><q-icon name="payments" /></div>
             <div class="col-8 text-bold">1,000,000</div>
           </div>
-          <q-tab
-            v-if="!isAuthenticated"
-            label="Login"
-            @click="store.openModal"
-          />
+          <q-tab v-if="!isAuthenticated" label="Login" @click="openModal" />
           <!-- <q-avatar class="bg-secondary" icon="person" /> -->
           <q-btn-dropdown
             v-if="isAuthenticated"
             flat
             dense
             class="text-warning"
-            :label="store.user.name"
+            :label="user.name"
             ><q-list class="bg-primary text-warning">
               <q-item clickable v-close-popup @click="onItemClick">
                 <q-item-section>
@@ -35,7 +31,7 @@
                 </q-item-section>
               </q-item>
 
-              <q-item clickable v-close-popup @click="store.logout">
+              <q-item clickable v-close-popup @click="logout">
                 <q-item-section>
                   <q-item-label>Logout</q-item-label>
                 </q-item-section>
@@ -70,11 +66,18 @@ import LoginDialog from "src/components/LoginDialog.vue";
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "src/stores/authStore";
 
-const store = useAuthStore();
+const authStore = useAuthStore();
 
-const { isAuthenticated, profileName, isLoading, isOpen, showLogin } =
-  storeToRefs(store);
-
+const {
+  isAuthenticated,
+  profileName,
+  isLoading,
+  isOpen,
+  showLogin,
+  userData,
+  user,
+} = storeToRefs(authStore);
+const { getUser, btnPlay, openModal, logout } = authStore;
 defineOptions({
   name: "MainLayout",
 });
@@ -82,14 +85,6 @@ defineOptions({
 const showLoginDialog = ref(false);
 const showSignUpDialog = ref(false);
 const fullHeight = ref(false);
-
-function btnRanks() {
-  if (!isAuthenticated) {
-    showLoginDialog.value = true;
-  } else {
-    this.router.push("/ranks");
-  }
-}
 
 const linksList = [
   {
@@ -141,6 +136,10 @@ const leftDrawerOpen = ref(false);
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
+
+onMounted(() => {
+  getUser();
+});
 </script>
 
 <style lang="scss" scoped></style>

@@ -109,6 +109,7 @@ const { matchList, tableLoading, isOpen, challengeModal, hostName } =
   storeToRefs(matchstore);
 
 const { isAuthenticated } = storeToRefs(authStore);
+const { getUser } = authStore;
 const { filterTeam, filterOne, openModal, openChallengeModal, matchRequest } =
   matchstore;
 
@@ -141,7 +142,7 @@ watch(matchList, (newList) => {
   }
 });
 onMounted(() => {
-  authStore.getUser();
+  getUser();
   showLoading();
 });
 onBeforeUnmount(() => {

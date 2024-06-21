@@ -12,7 +12,6 @@ import {
   query,
   arrayUnion,
   deleteDoc,
-  arrayRemove,
   onSnapshot,
 } from "firebase/firestore";
 import { db } from "src/boot/firebase";
@@ -405,24 +404,32 @@ export const useMatchStore = defineStore("match", {
       this.tableLoading = false;
     },
     async matchRequest() {
-      if (!this.isChallenger && !this.isHost) {
-        const docRef = doc(db, "matches", this.matchId);
+      try {
+        if (!this.isChallenger && !this.isHost) {
+          const docRef = doc(db, "matches", this.matchId);
 
-        await updateDoc(docRef, {
-          requests: arrayUnion({
-            id: this.playerId,
-            challenger: this.playerName,
-          }),
-        });
+          await updateDoc(docRef, {
+            requests: arrayUnion({
+              id: this.playerId,
+              challenger: this.playerName,
+            }),
+          });
 
-        console.log("Request sent");
-        Notify.create({
-          color: "positive",
-          message: "Request sent!",
-        });
-        this.challengeModal = false;
-      } else {
-        console.log("You are still in a lobby, please leave first!");
+          Notify.create({
+            color: "positive",
+            message: "Challenge request sent!",
+          });
+          this.challengeModal = false;
+        } else {
+          Notify.create({
+            icon: "announcement",
+            color: "warning",
+            textColor: "dark",
+            message: "You are stil in the lobby, please leave first!",
+          });
+        }
+      } catch (error) {
+        console.error(error);
       }
     },
     async acceptRequest(id) {
@@ -436,7 +443,10 @@ export const useMatchStore = defineStore("match", {
           acceptedId: arrayUnion(id),
         });
         this.challengeRequestsModal = false;
-        console.log("User Accepted");
+        Notify.create({
+          color: "positive",
+          message: "User's request challenge accepted",
+        });
       } catch (error) {
         console.error(error);
       }
@@ -458,6 +468,7 @@ export const useMatchStore = defineStore("match", {
           await updateDoc(docRef, {
             isChallenger: false,
           });
+          this.matchLeaveModal = false;
           Notify.create({
             color: "positive",
             message: "You left the match",
@@ -468,7 +479,6 @@ export const useMatchStore = defineStore("match", {
       }
     },
     realTimeMatch() {
-      this.teamLoading = true;
       try {
         const unsub = onSnapshot(
           doc(db, "matches", this.routeMatch),
@@ -493,8 +503,12 @@ export const useMatchStore = defineStore("match", {
             });
           }
         );
+        if (this.requestList.length > 0) {
+          this.isRequest = true;
+        } else {
+          this.isRequest = false;
+        }
         this.unsubscribeRealTimeMatch = unsub;
-        this.teamLoading = false;
       } catch (error) {
         Notify.create({
           color: "negative",
@@ -693,6 +707,10 @@ export const useMatchStore = defineStore("match", {
 
           this.isOpen = false;
           this.tableLoading = false;
+          Notify.create({
+            color: "positive",
+            message: "Match has been created, please wait for challengers",
+          });
         } else {
           Notify.create({
             icon: "announcement",
@@ -701,10 +719,6 @@ export const useMatchStore = defineStore("match", {
             message: "You are stil in the lobby, please leave first!",
           });
         }
-        Notify.create({
-          color: "positive",
-          message: "Match has been created, please wait for challengers",
-        });
       } catch (error) {
         Notify.create({
           color: "negative",
@@ -790,14 +804,6 @@ export const useMatchStore = defineStore("match", {
       this.teamData.member3 = "";
       this.teamData.member4 = "";
       this.teamData.member5 = "";
-    },
-
-    showRequest() {
-      if (this.requestBadge > 0) {
-        this.isRequest = true;
-      } else {
-        this.isRequest = false;
-      }
     },
   },
 });

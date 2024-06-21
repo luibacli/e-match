@@ -8,16 +8,18 @@ defineOptions({
 });
 import { onMounted } from "vue";
 import { useAuthStore } from "./stores/authStore";
+import { storeToRefs } from "pinia";
 
 // async function initializeCounter() {
 //   const counterRef = doc(db, "counters", "matchCounter");
 //   await setDoc(counterRef, { counter: 0 });
 // }
-const store = useAuthStore();
+const authStore = useAuthStore();
+
+const { monitorAuthState } = authStore;
 
 onMounted(() => {
-  store.monitorAuthState();
-  store.getUser();
+  monitorAuthState();
 
   // if (store.isAuthenticated) {
   //   store.getUser();

@@ -348,9 +348,12 @@
 
 <script setup>
 import { useMatchStore } from "src/stores/matchStore";
+import { useAuthStore } from "src/stores/authStore";
 import { onMounted, onBeforeUnmount } from "vue";
 import { storeToRefs } from "pinia";
 const matchStore = useMatchStore();
+const authStore = useAuthStore();
+const { getUser } = authStore;
 const {
   matchData,
   requestList,
@@ -364,7 +367,6 @@ const {
   teamDeleteModal,
   matchLeaveModal,
   challengeRequestsModal,
-  challengerTeamList,
   challengerList,
   isHost,
   isChallenger,
@@ -381,7 +383,7 @@ const {
   deleteTeam,
   updateTeam,
   setTeam,
-  showRequest,
+
   loadTeams,
   acceptRequest,
   confirmLeave,
@@ -391,10 +393,9 @@ const {
 
 const teams = teamList;
 const requests = requestList;
-const challengers = challengerTeamList;
 
 onMounted(() => {
-  showRequest();
+  getUser();
   loadTeams();
   realTimeMatch();
 });
