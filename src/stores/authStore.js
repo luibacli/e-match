@@ -175,7 +175,6 @@ export const useAuthStore = defineStore("auth", {
               this.userData = data || {};
               this.user.id = data.id;
               this.user.name = data.displayName;
-              console.log(this.userData);
             } else {
               throw new Error("Error fetching user");
             }

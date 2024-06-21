@@ -14,7 +14,7 @@
             style="width: 100px"
           >
             <div class="col-2 q-ml-sm"><q-icon name="payments" /></div>
-            <div class="col-8 text-bold">1,000,000</div>
+            <div class="col-8 text-bold">{{ userData.balance }}</div>
           </div>
           <q-tab v-if="!isAuthenticated" label="Login" @click="openModal" />
           <!-- <q-avatar class="bg-secondary" icon="person" /> -->

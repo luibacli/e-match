@@ -10,30 +10,56 @@
 
     <div class="row justify-center">
       <q-card class="bg-warning q-pa-md" style="width: 100%; max-width: 1000px">
-        <div v-show="isHost" class="row bg-secondary text-yellow">
-          <q-btn
-            flat
-            dense
-            size="md"
-            label="Waiting for Request"
-            class="text-warning"
-            @click="openChallengeRequestsModal"
-            ><span class="text-yellow"><q-icon name="notifications" /></span>
-            <q-badge v-show="isRequest" color="red" floating
-              >{{ requestBadge }}
-            </q-badge>
-          </q-btn>
+        <div class="row bg-secondary text-warning">
+          <div v-show="isHost" class="col text-yellow">
+            <q-btn
+              flat
+              dense
+              size="md"
+              label="Waiting..."
+              class="text-warning"
+              @click="openChallengeRequestsModal"
+              ><span class="text-yellow"><q-icon name="notifications" /></span>
+              <q-badge v-show="isRequest" color="red" floating
+                >{{ requestBadge }}
+              </q-badge>
+            </q-btn>
+          </div>
+          <div v-show="matchData.challengerReady" class="col-6 text-right">
+            {{ matchData.challenger }} is now ready!
+            <q-icon name="check_circle" class="text-green" size="md" />
+          </div>
         </div>
+
         <q-card-section
           horizontal
           class="row justify-between bg-primary text-warning text-h5"
         >
-          <q-card-section>Bet: {{ matchData.bet }}</q-card-section>
-          <q-card-section>e-match ID: {{ matchData.id }}</q-card-section>
+          <q-card-section
+            ><div class="text-subtitle2">Bet: {{ matchData.bet }}</div>
+          </q-card-section>
+          <q-card-section
+            ><div class="text-subtitle2">e-match ID: {{ matchData.id }}</div>
+          </q-card-section>
         </q-card-section>
+        <div
+          v-show="matchData.isStart"
+          class="row justify-center text-h6 text-bold text-secondary bg-secondary text-warning"
+        >
+          Game starts, good luck!
+        </div>
         <q-card-section class="bg-primary text-warning"
           ><div class="row q-gutter-md">
-            <q-btn class="bg-blue" label="Add Team" @click="openTeamModal" />
+            <div class="col">
+              <q-btn
+                flat
+                dense
+                class="bg-blue"
+                label="Add Team"
+                @click="openTeamModal"
+                size="sm"
+              />
+            </div>
           </div>
         </q-card-section>
         <q-card-section
@@ -92,11 +118,20 @@
             v-show="isHost"
             label="Start!"
             class="bg-positive text-warning"
+            :disable="btnDisable"
+            @click="startMatch"
           />
           <q-btn
-            v-show="isChallenger"
+            v-show="isChallenger && !matchData.challengerReady"
             label="Ready!"
             class="bg-positive text-warning"
+            @click="ready"
+          />
+          <q-btn
+            v-show="isChallenger && matchData.challengerReady"
+            label="Cancel"
+            class="bg-blue text-warning"
+            @click="notReady"
           />
         </q-card-section>
       </q-card>
@@ -372,6 +407,7 @@ const {
   isChallenger,
   isRequest,
   requestBadge,
+  btnDisable,
 } = storeToRefs(matchStore);
 const {
   openTeamUpdateModal,
@@ -383,7 +419,9 @@ const {
   deleteTeam,
   updateTeam,
   setTeam,
-
+  ready,
+  notReady,
+  startMatch,
   loadTeams,
   acceptRequest,
   confirmLeave,

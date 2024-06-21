@@ -28,6 +28,7 @@
               filled
               v-model="formData.password"
               label="Password"
+              type="password"
               class="bg-warning"
               style="border-radius: 12px"
             />

@@ -13,6 +13,7 @@ import {
   arrayUnion,
   deleteDoc,
   onSnapshot,
+  arrayRemove,
 } from "firebase/firestore";
 import { db } from "src/boot/firebase";
 
@@ -110,6 +111,7 @@ export const useMatchStore = defineStore("match", {
     challengeModal: false,
     challengeRequestsModal: false,
     teamLoading: false,
+    btnDisable: false,
     // playerList: ref({
     //   team: "",
     //   player1: "",
@@ -467,6 +469,7 @@ export const useMatchStore = defineStore("match", {
         if (this.isChallenger) {
           await updateDoc(docRef, {
             isChallenger: false,
+            acceptedId: arrayRemove(authStore.user.id),
           });
           this.matchLeaveModal = false;
           Notify.create({
@@ -521,6 +524,45 @@ export const useMatchStore = defineStore("match", {
     unsubscribeRealTimeMatch() {
       if (this.unsubscribeRealTimeMatch) {
         this.unsubscribeRealTimeMatch();
+      }
+    },
+    async ready() {
+      try {
+        const docRef = doc(db, "matches", this.routeMatch);
+
+        await updateDoc(docRef, {
+          challengerReady: true,
+          challenger: authStore.user.name,
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    async notReady() {
+      try {
+        const docRef = doc(db, "matches", this.routeMatch);
+
+        await updateDoc(docRef, {
+          challengerReady: false,
+          challenger: "",
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    async startMatch() {
+      try {
+        const docRef = doc(db, "matches", this.routeMatch);
+
+        await updateDoc(docRef, {
+          isStart: true,
+        });
+
+        // this.btnDisable = true;
+      } catch (error) {
+        console.log(error);
       }
     },
 
@@ -661,7 +703,7 @@ export const useMatchStore = defineStore("match", {
       //   throw new Error("Player ID not found");
       // }
       try {
-        if (!this.isHost && !this.isChallenger) {
+        if (!this.isHost) {
           const counterRef = doc(db, "counters", "matchCounter");
 
           const counterDoc = await getDoc(counterRef);
@@ -688,13 +730,18 @@ export const useMatchStore = defineStore("match", {
             id: `${newMatchId}`,
             host: this.host,
             challenger: "",
+            userRef: `${authStore.user.id}`,
+            challengerRef: "",
             game: this.match.game,
             type: this.match.type,
             bet: this.match.bet,
-            acceptedId: [`${this.playerId}`],
+            acceptedId: [`${authStore.user.id}`],
             gameLobbyId: "",
             hosts: [],
             challengers: [],
+            challengerReady: false,
+            isStart: false,
+            totalBet: 0,
             gameLobbyHosts: [],
             gameLobbyChallengers: [],
             requests: [],
@@ -714,6 +761,13 @@ export const useMatchStore = defineStore("match", {
           Notify.create({
             color: "positive",
             message: "Match has been created, please wait for challengers",
+          });
+        } else if (this.isHost || this.isChallenger) {
+          Notify.create({
+            icon: "announcement",
+            color: "warning",
+            textColor: "dark",
+            message: "You already created a match!",
           });
         } else {
           Notify.create({

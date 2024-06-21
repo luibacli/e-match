@@ -86,7 +86,7 @@
           ><div class="row">Send request challenge to {{ hostName }}?</div>
           <div class="row q-pa-sm justify-between">
             <q-btn flat label="Yes" class="bg-positive" @click="matchRequest" />
-            <q-btn flat label="No" class="bg-red" />
+            <q-btn flat label="No" class="bg-red" v-close-popup />
           </div> </q-card-section></q-card
     ></q-dialog>
   </q-page>
