@@ -23,7 +23,7 @@
             flat
             dense
             class="text-warning"
-            :label="user.name"
+            :label="playerName"
             ><q-list class="bg-primary text-warning">
               <q-item clickable v-close-popup @click="onItemClick">
                 <q-item-section>
@@ -61,7 +61,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, onBeforeMount, onBeforeUnmount } from "vue";
 import LoginDialog from "src/components/LoginDialog.vue";
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "src/stores/authStore";
@@ -76,8 +76,16 @@ const {
   showLogin,
   userData,
   user,
+  playerName,
 } = storeToRefs(authStore);
-const { getUser, btnPlay, openModal, logout } = authStore;
+const {
+  btnPlay,
+  openModal,
+  logout,
+  realTimeUser,
+  getUser,
+  unsubscribeRealTimeUser,
+} = authStore;
 defineOptions({
   name: "MainLayout",
 });
@@ -138,7 +146,12 @@ function toggleLeftDrawer() {
 }
 
 onMounted(() => {
-  getUser();
+  // getUser();
+  realTimeUser();
+});
+
+onBeforeUnmount(() => {
+  unsubscribeRealTimeMatch();
 });
 </script>
 

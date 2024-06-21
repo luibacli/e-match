@@ -171,7 +171,7 @@
         <q-card-section class="bg-warning">
           <div
             class="row q-pa-sm"
-            v-for="request in requests"
+            v-for="request in requestList"
             :key="request.id"
           >
             <div class="col">
@@ -395,7 +395,7 @@ const teams = teamList;
 const requests = requestList;
 
 onMounted(() => {
-  getUser();
+  // getUser();
   loadTeams();
   realTimeMatch();
 });

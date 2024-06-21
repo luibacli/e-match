@@ -95,7 +95,7 @@
 <script setup>
 import gameCards from "src/components/gameCards.vue";
 import CreateMatch from "src/components/CreateMatch.vue";
-import { onMounted, ref, watch, onBeforeUnmount } from "vue";
+import { onMounted, ref, watch, onBeforeUnmount, onBeforeMount } from "vue";
 import { useMatchStore } from "src/stores/matchStore";
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "src/stores/authStore";
@@ -109,7 +109,7 @@ const { matchList, tableLoading, isOpen, challengeModal, hostName } =
   storeToRefs(matchstore);
 
 const { isAuthenticated } = storeToRefs(authStore);
-const { getUser } = authStore;
+const { realTimeUser, unsubscribeRealTimeUser, getUser } = authStore;
 const { filterTeam, filterOne, openModal, openChallengeModal, matchRequest } =
   matchstore;
 
@@ -142,14 +142,17 @@ watch(matchList, (newList) => {
   }
 });
 onMounted(() => {
-  getUser();
+  // getUser();
+  realTimeUser();
   showLoading();
 });
+
 onBeforeUnmount(() => {
   if (timer !== void 0) {
     clearTimeout(timer);
     $q.loading.hide();
   }
+  unsubscribeRealTimeUser();
 });
 </script>
 

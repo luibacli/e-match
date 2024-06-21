@@ -20,10 +20,5 @@ const { monitorAuthState } = authStore;
 
 onMounted(() => {
   monitorAuthState();
-
-  // if (store.isAuthenticated) {
-  //   store.getUser();
-  //   console.log(store.user.id);
-  // }
 });
 </script>

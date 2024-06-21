@@ -1,4 +1,4 @@
-import { defineStore } from "pinia";
+import { defineStore, storeToRefs } from "pinia";
 import {
   doc,
   setDoc,
@@ -20,8 +20,8 @@ import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "./authStore";
 
 import { Notify } from "quasar";
-
 const authStore = useAuthStore();
+// const { playerId, playerName } = storeToRefs(authStore);
 
 export const useMatchStore = defineStore("match", {
   state: () => ({
@@ -410,8 +410,8 @@ export const useMatchStore = defineStore("match", {
 
           await updateDoc(docRef, {
             requests: arrayUnion({
-              id: this.playerId,
-              challenger: this.playerName,
+              id: authStore.user.id,
+              challenger: authStore.user.name,
             }),
           });
 
@@ -458,7 +458,7 @@ export const useMatchStore = defineStore("match", {
           await updateDoc(docRef, {
             isHost: false,
           });
-
+          this.matchLeaveModal = false;
           Notify.create({
             color: "positive",
             message: "You left the match and it has been deleted",
@@ -490,7 +490,13 @@ export const useMatchStore = defineStore("match", {
               this.playerList = data.hosts || {};
               this.challengerList = data.challengers || {};
               this.requestList = data.requests || [];
+              console.log("requests", this.requestList);
               this.requestBadge = this.requestList.length;
+              if (this.requestList.length > 0) {
+                this.isRequest = true;
+              } else {
+                this.isRequest = false;
+              }
             } else {
               console.log("No Data Found");
             }
@@ -503,11 +509,7 @@ export const useMatchStore = defineStore("match", {
             });
           }
         );
-        if (this.requestList.length > 0) {
-          this.isRequest = true;
-        } else {
-          this.isRequest = false;
-        }
+
         this.unsubscribeRealTimeMatch = unsub;
       } catch (error) {
         Notify.create({
@@ -572,7 +574,7 @@ export const useMatchStore = defineStore("match", {
           color: "positive",
           message: "Your team is now set",
         });
-        this.teamLoading = true;
+        this.teamLoading = false;
       } catch (error) {
         Notify.create({
           color: "negative",
@@ -655,7 +657,9 @@ export const useMatchStore = defineStore("match", {
     },
     async createMatch() {
       this.tableLoading = true;
-
+      // if (this.playerId) {
+      //   throw new Error("Player ID not found");
+      // }
       try {
         if (!this.isHost && !this.isChallenger) {
           const counterRef = doc(db, "counters", "matchCounter");
@@ -701,7 +705,7 @@ export const useMatchStore = defineStore("match", {
           };
           this.matchId = docData.id;
           await setDoc(doc(db, "matches", newMatchId), docData);
-          const userRef = doc(db, "users", this.playerId);
+          const userRef = doc(db, "users", authStore.user.id);
           await updateDoc(userRef, { isHost: true });
           this.router.push(`/play/${this.matchId}`);
 
@@ -720,10 +724,7 @@ export const useMatchStore = defineStore("match", {
           });
         }
       } catch (error) {
-        Notify.create({
-          color: "negative",
-          message: error.message,
-        });
+        console.error(error);
       }
     },
 

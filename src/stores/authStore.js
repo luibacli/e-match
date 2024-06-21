@@ -7,7 +7,13 @@ import {
   signOut,
   updateProfile,
 } from "firebase/auth";
-import { setDoc, doc, serverTimestamp, getDoc } from "firebase/firestore";
+import {
+  setDoc,
+  doc,
+  serverTimestamp,
+  getDoc,
+  onSnapshot,
+} from "firebase/firestore";
 import { ref } from "vue";
 import { Notify } from "quasar";
 
@@ -18,6 +24,7 @@ export const useAuthStore = defineStore("auth", {
       password: "",
     }),
     registerForm: ref({
+      id: "",
       displayName: "",
       email: "",
       phoneNumber: "",
@@ -56,6 +63,14 @@ export const useAuthStore = defineStore("auth", {
     isAuthenticated: false,
     isLoading: false,
   }),
+  getters: {
+    playerId: (state) => {
+      return state.user.id;
+    },
+    playerName: (state) => {
+      return state.user.name;
+    },
+  },
   actions: {
     async loginEmailPassword() {
       this.isLoading = true;
@@ -68,8 +83,6 @@ export const useAuthStore = defineStore("auth", {
         );
         const user = userCredential.user;
         if (user) {
-          this.user.id = user.uid;
-          this.user.name = user.displayName;
           this.isOpen = false;
           this.router.push("/play");
           this.isLoading = false;
@@ -96,6 +109,7 @@ export const useAuthStore = defineStore("auth", {
             displayName: this.registerForm.displayName,
           });
           const userDataCopy = { ...userData };
+          userDataCopy.id = user.uid;
           delete userDataCopy.password;
           delete userDataCopy.confirmPassword;
           userDataCopy.timestamp = serverTimestamp();
@@ -121,8 +135,6 @@ export const useAuthStore = defineStore("auth", {
           this.isAuthenticated = true;
           this.user.name = user.displayName;
           this.user.id = user.uid;
-
-          console.log(user);
         } else {
           Notify.create({
             color: "warning",
@@ -132,23 +144,6 @@ export const useAuthStore = defineStore("auth", {
         }
       });
     },
-    // async getUser() {
-    //   const docRef = doc(db, "users", this.user.id);
-    //   const docSnap = await getDoc(docRef);
-    //   const data = docSnap.data();
-    //   this.userData.displayName = data.displayName;
-    //   this.userData.balance = data.balance;
-    //   this.userData.wins = data.wins;
-    //   this.userData.loss = data.loss;
-    //   this.userData.phoneNumber = data.phoneNumber;
-    //   this.userData.isAccepted = data.isAccepted;
-    //   this.userData.isHost = data.isHost;
-    //   this.userData.isChallenger = data.isChallenger;
-    //   this.userData.isAdmin = data.isAdmin;
-
-    //   console.log(this.userData);
-    // },
-
     async getUser() {
       try {
         if (!this.user.id) {
@@ -169,11 +164,46 @@ export const useAuthStore = defineStore("auth", {
         console.error("Error fetching user data:", error);
       }
     },
+
+    realTimeUser() {
+      try {
+        const unsub = onSnapshot(
+          doc(db, "users", this.user.id),
+          (docSnapshot) => {
+            const data = docSnapshot.data();
+            if (data) {
+              this.userData = data || {};
+              this.user.id = data.id;
+              this.user.name = data.displayName;
+              console.log(this.userData);
+            } else {
+              throw new Error("Error fetching user");
+            }
+            (error) => {
+              Notify.create({
+                color: "negative",
+                message: error.message,
+              });
+            };
+          }
+        );
+        this.unsubscribeRealTimeUser = unsub;
+      } catch (error) {
+        console.error(error);
+      }
+    },
     async logout() {
       await signOut(auth);
       this.isAuthenticated = false;
       this.router.push("/");
     },
+
+    unsubscribeRealTimeUser() {
+      if (this.unsubscribeRealTimeUser) {
+        this.unsubscribeRealTimeUser();
+      }
+    },
+
     openModal() {
       this.isOpen = true;
     },
