@@ -1,15 +1,7 @@
 <template>
-  <div v-if="teamLoading" class="text-h4 text-warning text-center">
-    Loading....
-  </div>
-  <q-page v-else>
+  <q-page>
     <q-btn icon="refresh" class="bg-grey" @click="realTimeMatch" />
     <div class="row justify-center">
-      <!-- <div>
-        <ul v-for="request in requests" :key="request.id">
-          <li>{{ request.challenger }} has sent you a challenge request</li>
-        </ul>
-      </div> -->
       <div class="q-ma-md q-pa-sm bg-warning" style="width: 450px">
         <span class="text-red text-bold">Note:</span> Please make sure all
         players name match in the current game!
@@ -18,7 +10,7 @@
 
     <div class="row justify-center">
       <q-card class="bg-warning q-pa-md" style="width: 100%; max-width: 1000px">
-        <div class="row bg-secondary text-yellow">
+        <div v-show="isHost" class="row bg-secondary text-yellow">
           <q-btn
             flat
             dense
@@ -26,8 +18,11 @@
             label="Waiting for Request"
             class="text-warning"
             @click="openChallengeRequestsModal"
-            ><span class="text-yellow"><q-icon name="notifications" /></span
-          ></q-btn>
+            ><span class="text-yellow"><q-icon name="notifications" /></span>
+            <q-badge v-show="isRequest" color="red" floating
+              >{{ requestBadge }}
+            </q-badge>
+          </q-btn>
         </div>
         <q-card-section
           horizontal
@@ -45,7 +40,7 @@
           class="justify-between bg-secondary text-warning q-pa-sm"
           ><div class="row">
             <div class="col">
-              <q-avatar
+              <q-avatar size="md"
                 ><img src="https://cdn.quasar.dev/img/avatar.png"
               /></q-avatar>
               <span class="text-bold q-ml-md"></span>
@@ -60,7 +55,7 @@
             </div>
             <div class="col text-center text-h4">VS</div>
             <div class="col">
-              <q-avatar
+              <q-avatar size="md"
                 ><img src="https://cdn.quasar.dev/img/avatar.png"
               /></q-avatar>
               <span class="text-bold q-ml-md"></span>
@@ -109,7 +104,10 @@
     <!-- my teams -->
     <div class="q-pa-sm">
       <div class="text-warning text-bold bg-primary text-center">My Teams</div>
-      <div class="row q-pa-sm text-warning">
+      <div v-if="teamLoading" class="text-h4 text-warning text-center">
+        <q-spinner-puff color="warning" size="4em" />
+      </div>
+      <div v-else class="row q-pa-sm text-warning">
         <div class="row q-pa-sm" v-for="team in teams" :key="team.id">
           <q-card class="bg-primary" style="width: 100%; max-width: 300px">
             <q-card-section
@@ -160,68 +158,6 @@
         </div>
       </div>
     </div>
-
-    <!-- challenger team -->
-    <!-- <div v-show="isChallenger" class="q-pa-sm">
-      <div class="text-warning text-bold bg-primary text-center">My Teams</div>
-      <div class="row q-pa-sm text-warning">
-        <div
-          class="row q-pa-sm"
-          v-for="challenger in challengers"
-          :key="challenger.id"
-        >
-          <q-card class="bg-primary" style="width: 100%; max-width: 300px">
-            <q-card-section
-              ><div class="row text-bold">
-                <div class="col-10">{{ challenger.data.name }}</div>
-                <div class="col q-gutter-sm">
-                  <q-btn flat dense size="sm" class="bg-gray"
-                    ><q-icon
-                      name="edit"
-                      @click="openTeamUpdateModal(challenger.id)"
-                  /></q-btn>
-                  <q-btn flat dense size="sm" class="bg-red"
-                    ><q-icon
-                      name="delete"
-                      @click="openTeamDeleteModal(challenger.id)"
-                  /></q-btn>
-                </div></div
-            ></q-card-section>
-            <q-separator />
-            <q-card-section>
-              <div class="row">
-                <div class="col">
-                  <span class="text-positive">Wins:</span>
-                  {{ challenger.data.wins }}
-                </div>
-                <div class="col">
-                  <span class="text-red">Loss:</span> {{ challenger.data.loss }}
-                </div>
-              </div></q-card-section
-            >
-            <q-separator />
-            <q-card-section>
-              <div class="row text-overline">Players:</div>
-              <div class="col">
-                <li>{{ challenger.data.member1 }}</li>
-                <li>{{ challenger.data.member2 }}</li>
-                <li>{{ challenger.data.member3 }}</li>
-                <li>{{ challenger.data.member4 }}</li>
-                <li>{{ challenger.data.member5 }}</li>
-              </div>
-              <div class="q-pa-sm">
-                <q-btn
-                  flat
-                  dense
-                  label="Play with this team"
-                  class="bg-green"
-                  size="sm"
-                  @click="setTeam(challenger.id)"
-                /></div></q-card-section
-          ></q-card>
-        </div>
-      </div>
-    </div> -->
 
     <!-- challenge requests dialog -->
     <q-dialog v-model="challengeRequestsModal"
@@ -432,6 +368,8 @@ const {
   challengerList,
   isHost,
   isChallenger,
+  isRequest,
+  requestBadge,
 } = storeToRefs(matchStore);
 const {
   openTeamUpdateModal,
@@ -443,7 +381,7 @@ const {
   deleteTeam,
   updateTeam,
   setTeam,
-  joinMatch,
+  showRequest,
   loadTeams,
   acceptRequest,
   confirmLeave,
@@ -456,6 +394,7 @@ const requests = requestList;
 const challengers = challengerTeamList;
 
 onMounted(() => {
+  showRequest();
   loadTeams();
   realTimeMatch();
 });

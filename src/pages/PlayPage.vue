@@ -1,5 +1,6 @@
 <template>
-  <q-page>
+  <div v-if="pageLoading"></div>
+  <q-page v-else>
     <div v-if="isAuthenticated">
       <gameCards />
       <CreateMatch :isOpen="isOpen" @update:isOpen="isOpen = $event" />
@@ -15,8 +16,10 @@
         </q-tabs>
       </div>
 
-      <div v-if="tableLoading" class="text-warning">
-        <div class="text-warning text-h5">Loading....</div>
+      <div v-if="tableLoading" class="row justify-center text-warning">
+        <div class="text-warning text-h5">
+          <q-spinner-puff color="warning" size="5.5em" />
+        </div>
       </div>
 
       <div v-else class="row q-pa-sm">
@@ -92,24 +95,18 @@
 <script setup>
 import gameCards from "src/components/gameCards.vue";
 import CreateMatch from "src/components/CreateMatch.vue";
-import { onMounted, ref, defineEmits, watch } from "vue";
+import { onMounted, ref, watch, onBeforeUnmount } from "vue";
 import { useMatchStore } from "src/stores/matchStore";
-
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "src/stores/authStore";
+import { useQuasar, QSpinnerPuff } from "quasar";
 
+const $q = useQuasar();
 const matchstore = useMatchStore();
 const authStore = useAuthStore();
 
-const {
-  matchList,
-  matchColumns,
-  tableLoading,
-  isOpen,
-  challengeModal,
-  hostName,
-  matchId,
-} = storeToRefs(matchstore);
+const { matchList, tableLoading, isOpen, challengeModal, hostName } =
+  storeToRefs(matchstore);
 
 const { isAuthenticated } = storeToRefs(authStore);
 const { filterTeam, filterOne, openModal, openChallengeModal, matchRequest } =
@@ -117,6 +114,23 @@ const { filterTeam, filterOne, openModal, openChallengeModal, matchRequest } =
 
 const games = ref([]);
 const hasData = ref(false);
+const pageLoading = ref(false);
+let timer;
+
+function showLoading() {
+  pageLoading.value = true;
+  $q.loading.show({
+    spinner: QSpinnerPuff,
+    spinnerColor: "warning",
+    spinnerSize: 140,
+    backgroundColor: "indigo",
+  });
+  timer = setTimeout(() => {
+    pageLoading.value = false;
+    $q.loading.hide();
+    timer = void 0;
+  }, 1000);
+}
 
 watch(matchList, (newList) => {
   games.value = newList;
@@ -128,6 +142,13 @@ watch(matchList, (newList) => {
 });
 onMounted(() => {
   authStore.getUser();
+  showLoading();
+});
+onBeforeUnmount(() => {
+  if (timer !== void 0) {
+    clearTimeout(timer);
+    $q.loading.hide();
+  }
 });
 </script>
 

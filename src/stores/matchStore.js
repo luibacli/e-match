@@ -16,14 +16,11 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { db } from "src/boot/firebase";
-import { ref } from "vue";
+
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "./authStore";
-import { route } from "quasar/wrappers";
-import { Notify } from "quasar";
-import { useQuasar } from "quasar";
 
-const $q = useQuasar();
+import { Notify } from "quasar";
 
 const authStore = useAuthStore();
 
@@ -67,6 +64,8 @@ export const useMatchStore = defineStore("match", {
     gameName: "",
     matchList: [],
     requestList: [],
+    requestBadge: 0,
+    isRequest: false,
     teamData: {
       id: "",
       name: "",
@@ -405,33 +404,6 @@ export const useMatchStore = defineStore("match", {
       this.matchList = gameData;
       this.tableLoading = false;
     },
-    async loadMatch(id) {
-      const docRef = doc(db, "matches", id);
-
-      const docSnap = await getDoc(docRef);
-      console.log("data", docSnap.data());
-    },
-
-    async joinMatch() {
-      this.teamLoading = true;
-      const docRef = doc(db, "matches", this.routeMatch);
-      const docSnap = await getDoc(docRef);
-
-      const data = docSnap.data();
-      this.matchData = { ...data };
-
-      if (this.isHost) {
-        console.log("yes you are host");
-      } else {
-        console.log("you are not the host");
-      }
-      if (this.isChallenger) {
-        console.log("yes you are challenger");
-      } else {
-        console.log("you are not the challenger");
-      }
-      this.teamLoading = false;
-    },
     async matchRequest() {
       if (!this.isChallenger && !this.isHost) {
         const docRef = doc(db, "matches", this.matchId);
@@ -472,18 +444,24 @@ export const useMatchStore = defineStore("match", {
     async confirmLeave() {
       try {
         const docRef = doc(db, "users", this.playerId);
-
         if (this.isHost) {
           await updateDoc(docRef, {
             isHost: false,
           });
-          console.log("You are now leaving as host");
+
+          Notify.create({
+            color: "positive",
+            message: "You left the match and it has been deleted",
+          });
         }
         if (this.isChallenger) {
           await updateDoc(docRef, {
             isChallenger: false,
           });
-          console.log("You are now leaving as challenger");
+          Notify.create({
+            color: "positive",
+            message: "You left the match",
+          });
         }
       } catch (error) {
         console.error(error);
@@ -494,10 +472,7 @@ export const useMatchStore = defineStore("match", {
       try {
         const unsub = onSnapshot(
           doc(db, "matches", this.routeMatch),
-          // {
-          //   includeMetadataChanges: true,
-          //   source: "cache",
-          // },
+
           (docSnapShot) => {
             const data = docSnapShot.data();
             if (data) {
@@ -505,6 +480,7 @@ export const useMatchStore = defineStore("match", {
               this.playerList = data.hosts || {};
               this.challengerList = data.challengers || {};
               this.requestList = data.requests || [];
+              this.requestBadge = this.requestList.length;
             } else {
               console.log("No Data Found");
             }
@@ -559,6 +535,7 @@ export const useMatchStore = defineStore("match", {
       }
     },
     async setTeam(teamId) {
+      this.teamLoading = true;
       try {
         const docRef = doc(db, "teams", teamId);
         const matchRef = doc(db, "matches", this.routeMatch);
@@ -577,6 +554,11 @@ export const useMatchStore = defineStore("match", {
         } else {
           console.log("Not a challenger nor a host");
         }
+        Notify.create({
+          color: "positive",
+          message: "Your team is now set",
+        });
+        this.teamLoading = true;
       } catch (error) {
         Notify.create({
           color: "negative",
@@ -585,53 +567,75 @@ export const useMatchStore = defineStore("match", {
       }
     },
     async createTeam() {
-      this.teamLoading = true;
-      const docData = {
-        name: this.teamData.name,
-        member1: this.teamData.member1,
-        member2: this.teamData.member2,
-        member3: this.teamData.member3,
-        member4: this.teamData.member4,
-        member5: this.teamData.member5,
-        wins: this.teamData.wins,
-        loss: this.teamData.loss,
-        userRef: this.playerId,
-        timestamp: serverTimestamp(),
-      };
+      try {
+        const docData = {
+          name: this.teamData.name,
+          member1: this.teamData.member1,
+          member2: this.teamData.member2,
+          member3: this.teamData.member3,
+          member4: this.teamData.member4,
+          member5: this.teamData.member5,
+          wins: this.teamData.wins,
+          loss: this.teamData.loss,
+          userRef: this.playerId,
+          timestamp: serverTimestamp(),
+        };
 
-      const teamRef = collection(db, "teams");
+        const teamRef = collection(db, "teams");
+        await addDoc(teamRef, docData);
+        await this.loadTeams();
+        this.teamModal = false;
 
-      await addDoc(teamRef, docData);
-
-      this.clearTeamData();
-      await this.loadTeams();
-      this.optionsModel = "";
-      this.teamModal = false;
-      this.teamLoading = false;
-      console.log("team Data", docData);
+        Notify.create({
+          color: "positive",
+          message: "You created your team!",
+        });
+      } catch (error) {
+        Notify.create({
+          color: "negative",
+          message: error.message,
+        });
+      }
     },
     async updateTeam() {
-      this.openTeamUpdateModal = false;
-      const docData = {
-        name: this.teamUpdate.name,
-        member1: this.teamUpdate.member1,
-        member2: this.teamUpdate.member2,
-        member3: this.teamUpdate.member3,
-        member4: this.teamUpdate.member4,
-        member5: this.teamUpdate.member5,
-      };
-      const docRef = doc(db, "teams", this.teamId);
-      await updateDoc(docRef, docData);
-      this.optionsModel = "";
-      this.playerList = { ...docData };
-      await this.setTeam(this.teamId);
-      await this.loadTeams();
+      try {
+        const docData = {
+          name: this.teamUpdate.name,
+          member1: this.teamUpdate.member1,
+          member2: this.teamUpdate.member2,
+          member3: this.teamUpdate.member3,
+          member4: this.teamUpdate.member4,
+          member5: this.teamUpdate.member5,
+        };
+        const docRef = doc(db, "teams", this.teamId);
+        await updateDoc(docRef, docData);
+        await this.loadTeams();
+        this.openTeamUpdateModal = false;
+        Notify.create({
+          color: "positive",
+          message: "Your team is now updated!",
+        });
+      } catch (error) {
+        Notify.create({
+          color: "negative",
+          message: error.message,
+        });
+      }
     },
     async deleteTeam() {
-      await deleteDoc(doc(db, "teams", this.teamId));
-      this.optionsModel = "";
-      await this.loadTeams();
-      await this.setTeam();
+      try {
+        await deleteDoc(doc(db, "teams", this.teamId));
+        await this.loadTeams();
+        Notify.create({
+          color: "positive",
+          message: "Team deleted!",
+        });
+      } catch (error) {
+        Notify.create({
+          color: "negative",
+          message: error.message,
+        });
+      }
 
       this.teamDeleteModal = false;
     },
@@ -690,13 +694,22 @@ export const useMatchStore = defineStore("match", {
           this.isOpen = false;
           this.tableLoading = false;
         } else {
-          $q.notify({
-            type: "negative",
-            message: 'This is a "negative" type notification.',
+          Notify.create({
+            icon: "announcement",
+            color: "warning",
+            textColor: "dark",
+            message: "You are stil in the lobby, please leave first!",
           });
         }
+        Notify.create({
+          color: "positive",
+          message: "Match has been created, please wait for challengers",
+        });
       } catch (error) {
-        console.error(error);
+        Notify.create({
+          color: "negative",
+          message: error.message,
+        });
       }
     },
 
@@ -778,12 +791,13 @@ export const useMatchStore = defineStore("match", {
       this.teamData.member4 = "";
       this.teamData.member5 = "";
     },
-    matchRefresh() {
-      if (!this.teamLoading) {
-        this.teamLoading = true;
-        this.teamLoading = false;
+
+    showRequest() {
+      if (this.requestBadge > 0) {
+        this.isRequest = true;
+      } else {
+        this.isRequest = false;
       }
-      console.log(this.teamLoading);
     },
   },
 });
