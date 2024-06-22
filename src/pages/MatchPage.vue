@@ -1,6 +1,5 @@
 <template>
   <q-page>
-    <q-btn icon="refresh" class="bg-grey" @click="realTimeMatch" />
     <div class="row justify-center">
       <div class="q-ma-md q-pa-sm bg-warning" style="width: 450px">
         <span class="text-red text-bold">Note:</span> Please make sure all
@@ -9,7 +8,7 @@
     </div>
 
     <div class="row justify-center">
-      <q-card class="bg-warning q-pa-md" style="width: 100%; max-width: 1000px">
+      <q-card class="bg-primary q-pa-md" style="width: 100%; max-width: 1000px">
         <div class="row bg-secondary text-warning">
           <div v-show="isHost" class="col text-yellow">
             <q-btn
@@ -25,7 +24,7 @@
               </q-badge>
             </q-btn>
           </div>
-          <div v-show="matchData.challengerReady" class="col-6 text-right">
+          <div v-show="matchData.challengerReady" class="col text-right">
             {{ matchData.challenger }} is now ready!
             <q-icon name="check_circle" class="text-green" size="md" />
           </div>
@@ -33,10 +32,12 @@
 
         <q-card-section
           horizontal
-          class="row justify-between bg-primary text-warning text-h5"
+          class="row justify-between bg-secondary rounded-borders text-warning text-h5"
         >
           <q-card-section
-            ><div class="text-subtitle2">Bet: {{ matchData.bet }}</div>
+            ><div class="text-subtitle2">
+              Bet: <span class="text-positive">{{ matchData.bet }}</span>
+            </div>
           </q-card-section>
           <q-card-section
             ><div class="text-subtitle2">e-match ID: {{ matchData.id }}</div>
@@ -149,14 +150,24 @@
               ><div class="row text-bold">
                 <div class="col-10">{{ team.data.name }}</div>
                 <div class="col q-gutter-sm">
-                  <q-btn flat dense size="sm" class="bg-gray"
-                    ><q-icon name="edit" @click="openTeamUpdateModal(team.id)"
-                  /></q-btn>
-                  <q-btn flat dense size="sm" class="bg-red"
-                    ><q-icon
-                      name="delete"
-                      @click="openTeamDeleteModal(team.id)"
-                  /></q-btn>
+                  <q-btn flat dense icon="more_vert">
+                    <q-menu class="bg-primary q-p-none" style="width: 50px">
+                      <q-list
+                        ><q-item clickable v-close-popup>
+                          <q-btn flat dense size="sm" class="bg-grey"
+                            ><q-icon
+                              name="edit"
+                              @click="openTeamUpdateModal(team.id)" /></q-btn
+                        ></q-item>
+                        <q-item>
+                          <q-btn flat dense size="sm" class="bg-red"
+                            ><q-icon
+                              name="delete"
+                              @click="openTeamDeleteModal(team.id)" /></q-btn
+                        ></q-item>
+                      </q-list>
+                    </q-menu>
+                  </q-btn>
                 </div></div
             ></q-card-section>
             <q-separator />

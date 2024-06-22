@@ -21,61 +21,74 @@
           <q-spinner-puff color="warning" size="5.5em" />
         </div>
       </div>
+      <div v-else v-show="hasData" class="text-warning row text-center">
+        <div class="text-warning justify-center text-h5">No match created</div>
+      </div>
 
-      <div v-else class="row q-pa-sm">
-        <div v-show="hasData" class="text-warning row text-center">
-          <div class="text-warning justify-center text-h5">
-            No match created
+      <div class="row q-gutter-md justify-center q-pa-sm">
+        <q-card
+          class="bg-primary text-warning match-card"
+          v-for="game in games"
+          :key="game.id"
+        >
+          <div class="row q-pa-sm">
+            <div class="col text-subtitle2 text-yellow">
+              {{ game.type }}
+            </div>
+            <div class="col text-caption text-right">id:{{ game.id }}</div>
           </div>
-        </div>
-        <div class="row q-gutter-sm justify-center">
-          <div class="row" v-for="game in games" :key="game.id">
-            <q-card class="bg-primary text-warning match-card">
-              <div class="row q-pa-sm">
-                <div class="col-12 text-subtitle2">{{ game.type }}</div>
-                <div class="col-12 text-caption">{{ game.id }}</div>
-              </div>
-              <q-separator />
-              <q-card-section>
+          <q-separator />
+          <q-card-section>
+            <div class="q-pa-none bg-warning q-col-gutter-sm rounded-borders">
+              <div class="q-pa-sm">
                 <div
-                  class="q-pa-none bg-warning q-col-gutter-sm rounded-borders"
+                  class="row justify-center bg-secondary text-warning rounded-borders"
                 >
-                  <div class="q-pa-sm">
-                    <div class="col-6">
-                      <span class="text-bold text-dark">
-                        <q-icon name="person" />
-                      </span>
-                      <span class="text-purple"> {{ game.host }}</span>
-                    </div>
-                    <div class="col-6 text-dark">
-                      <span class="text-dark text-bold">
-                        <q-icon name="emoji_events" />
-                      </span>
-                      <span class="text-positive">10</span> /
-                      <span class="text-negative">5</span>
-                    </div>
-                  </div>
-                  <div class="row q-pa-sm">
-                    <div class="col-12">
-                      <span class="text-bold text-dark">Bet:</span>
-                      <span class="text-secondary">{{ game.bet }}</span>
-                    </div>
+                  {{ game.game }}
+                </div>
+                <div class="row justify-center text-subtitle1">
+                  <span class="text-bold text-dark">
+                    <q-icon name="person" />
+                  </span>
+                  <span class="text-bold text-secondary">:</span>
+                  <span class="text-purple q-ml-sm">{{ game.host }}</span>
+                </div>
+                <div class="row text-dark bg-primary q-pa-sm rounded-borders">
+                  <div class="col text-bold text-warning">Bet:</div>
+                  <div class="col text-right text-bold text-positive">
+                    {{ game.bet }}
                   </div>
                 </div>
-              </q-card-section>
-              <div class="row justify-center q-mb-sm">
-                <q-btn
-                  class="bg-green"
-                  flat
-                  dense
-                  label="Challenge"
-                  size="sm"
-                  @click="openChallengeModal(game.id, game.host)"
-                />
+
+                <!-- <div class="col-6 text-dark">
+                  <span class="text-dark text-bold">
+                    <q-icon name="emoji_events" />
+                  </span>
+                  <span class="text-positive">10</span> /
+                  <span class="text-negative">5</span>
+                </div> -->
               </div>
-            </q-card>
+              <!-- <div class="row q-pa-sm">
+                <div class="col-12">
+                  <span class="text-bold text-dark">Bet:</span>
+                  <span class="text-secondary text-green text-bold q-ml-sm">{{
+                    game.bet
+                  }}</span>
+                </div>
+              </div> -->
+            </div>
+          </q-card-section>
+          <div class="row justify-center q-mb-sm">
+            <q-btn
+              class="bg-blue"
+              flat
+              dense
+              label="Challenge"
+              size="sm"
+              @click="openChallengeModal(game.id, game.host)"
+            />
           </div>
-        </div>
+        </q-card>
       </div>
     </div>
 
@@ -159,7 +172,8 @@ onBeforeUnmount(() => {
 <style lang="scss" scoped>
 .match-card {
   width: 100%;
-  height: 100%;
-  max-width: 120px;
+  height: 50%;
+  max-width: 185px;
+  max-height: 190px;
 }
 </style>
