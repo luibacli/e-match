@@ -111,6 +111,7 @@ export const useMatchStore = defineStore("match", {
     challengeModal: false,
     challengeRequestsModal: false,
     teamLoading: false,
+    startLoading: false,
     btnDisable: false,
     // playerList: ref({
     //   team: "",
@@ -553,6 +554,7 @@ export const useMatchStore = defineStore("match", {
     },
 
     async startMatch() {
+      this.startLoading = true;
       try {
         const docRef = doc(db, "matches", this.routeMatch);
 
@@ -561,6 +563,7 @@ export const useMatchStore = defineStore("match", {
         });
 
         // this.btnDisable = true;
+        this.startLoading = false;
       } catch (error) {
         console.log(error);
       }

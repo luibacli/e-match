@@ -1,7 +1,10 @@
 <template>
   <q-page>
     <div class="row justify-center">
-      <div class="q-ma-md q-pa-sm bg-warning" style="width: 450px">
+      <div
+        class="q-mb-md q-pa-sm bg-warning rounded-borders"
+        style="width: 450px"
+      >
         <span class="text-red text-bold">Note:</span> Please make sure all
         players name match in the current game!
       </div>
@@ -25,7 +28,8 @@
             </q-btn>
           </div>
           <div v-show="matchData.challengerReady" class="col text-right">
-            {{ matchData.challenger }} is now ready!
+            <span class="text-red">{{ matchData.challenger }}</span>
+            is now ready!
             <q-icon name="check_circle" class="text-green" size="md" />
           </div>
         </div>
@@ -47,7 +51,8 @@
           v-show="matchData.isStart"
           class="row justify-center text-h6 text-bold text-secondary bg-secondary text-warning"
         >
-          Game starts, good luck!
+          <q-spinner-gears color="blue" size="1.5em" v-if="startLoading" />
+          <div v-else class="text-orange">Game starts, good luck!</div>
         </div>
         <q-card-section class="bg-primary text-warning"
           ><div class="row q-gutter-md">
@@ -70,8 +75,10 @@
               <q-avatar size="md"
                 ><img src="https://cdn.quasar.dev/img/avatar.png"
               /></q-avatar>
-              <span class="text-bold q-ml-md"></span>
-              {{ playerList.name }}
+              <span class="text-bold q-ml-md text-blue">
+                {{ playerList.name }}
+              </span>
+
               <div v-if="playerList" class="row justify-center">
                 <div class="col-12 text-center">{{ playerList.member1 }}</div>
                 <div class="col-12 text-center">{{ playerList.member2 }}</div>
@@ -80,13 +87,15 @@
                 <div class="col-12 text-center">{{ playerList.member5 }}</div>
               </div>
             </div>
-            <div class="col text-center text-h4">VS</div>
+            <div class="col text-center text-h5 text-bold">VS</div>
             <div class="col">
               <q-avatar size="md"
                 ><img src="https://cdn.quasar.dev/img/avatar.png"
               /></q-avatar>
-              <span class="text-bold q-ml-md"></span>
-              {{ challengerList.name }}
+              <span class="text-bold q-ml-md text-red">
+                {{ challengerList.name }}</span
+              >
+
               <div v-if="challengerList" class="row justify-center">
                 <div class="col-12 text-center">
                   {{ challengerList.member1 }}
@@ -139,7 +148,11 @@
     </div>
     <!-- my teams -->
     <div class="q-pa-sm">
-      <div class="text-warning text-bold bg-primary text-center">My Teams</div>
+      <div
+        class="text-warning text-bold bg-primary text-center rounded-borders"
+      >
+        My Teams
+      </div>
       <div v-if="teamLoading" class="text-h4 text-warning text-center">
         <q-spinner-puff color="warning" size="4em" />
       </div>
@@ -407,6 +420,7 @@ const {
   teamUpdate,
   teamList,
   teamLoading,
+  startLoading,
   playerList,
   teamModal,
   teamUpdateModal,
@@ -457,9 +471,4 @@ onBeforeUnmount(() => {
 // });
 </script>
 
-<style lang="scss" scoped>
-.request {
-  border-bottom-color: aqua;
-  border-bottom: 100px;
-}
-</style>
+<style lang="scss" scoped></style>
