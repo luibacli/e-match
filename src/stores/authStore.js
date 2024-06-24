@@ -60,6 +60,8 @@ export const useAuthStore = defineStore("auth", {
     matchAccepted: [],
     matchLength: 0,
     gotAccepted: false,
+    hasCurrentMatch: false,
+    currentMatch: "",
     profileName: ref(""),
     showLogin: ref(false),
     isOpen: false,
@@ -180,21 +182,13 @@ export const useAuthStore = defineStore("auth", {
               this.user.id = data.id;
               this.user.name = data.displayName;
               this.matchAccepted = data.matchAccepted;
-              if (this.matchAccepted.length > 0) {
-                this.gotAccepted = true;
-                this.matchLength = this.matchAccepted.length;
+              this.currentMatch = data.currentMatchId;
+
+              if (this.currentMatch) {
+                this.hasCurrentMatch = true;
               } else {
-                this.gotAccepted = false;
+                this.hasCurrentMatch = false;
               }
-              this.matchAccepted.forEach((doc) => {
-                if (doc) {
-                  Notify.create({
-                    color: "indigo",
-                    message: `${doc.hostName} accepted your request`,
-                    position: "top-left",
-                  });
-                }
-              });
             } else {
               throw new Error("Error fetching user");
             }
@@ -209,6 +203,30 @@ export const useAuthStore = defineStore("auth", {
         this.unsubscribeRealTimeUser = unsub;
       } catch (error) {
         console.error(error);
+      }
+    },
+    showAccepted() {
+      try {
+        if (this.matchAccepted) {
+          const data = this.matchAccepted.length;
+          if (data.length > 0) {
+            this.matchLength = data;
+            this.gotAccepted = true;
+            this.matchAccepted.forEach((doc) => {
+              if (doc) {
+                Notify.create({
+                  color: "indigo",
+                  message: `${doc.hostName} accepted your request`,
+                  position: "top-left",
+                });
+              }
+            });
+          } else {
+            this.gotAccepted = false;
+          }
+        }
+      } catch (error) {
+        console.log(error);
       }
     },
     async logout() {

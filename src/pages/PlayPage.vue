@@ -2,14 +2,21 @@
   <div v-if="pageLoading"></div>
   <q-page v-else>
     <div v-if="isAuthenticated">
-      <div class="row">
-        <div class="col text-warning text-center">Hello</div>
-      </div>
       <gameCards />
       <CreateMatch :isOpen="isOpen" @update:isOpen="isOpen = $event" />
 
-      <div class="q-pa-md row justify-center">
-        <q-btn class="bg-warning" label="Create Match" @click="openModal" />
+      <div class="q-pa-md row">
+        <div class="col">
+          <q-btn class="bg-warning" label="Create Match" @click="openModal" />
+        </div>
+        <div class="col text-right">
+          <q-btn
+            v-show="hasCurrentMatch"
+            class="bg-grey"
+            label="Return to Lobby"
+            :to="`/play/${currentMatch}`"
+          />
+        </div>
       </div>
       <div class="bg-primary text-warning">
         <q-tabs>
@@ -124,8 +131,9 @@ const authStore = useAuthStore();
 const { matchList, tableLoading, isOpen, challengeModal, hostName } =
   storeToRefs(matchstore);
 
-const { isAuthenticated } = storeToRefs(authStore);
-const { realTimeUser, unsubscribeRealTimeUser, getUser } = authStore;
+const { isAuthenticated, hasCurrentMatch, currentMatch } =
+  storeToRefs(authStore);
+const { realTimeUser, unsubscribeRealTimeUser } = authStore;
 const { filterTeam, filterOne, openModal, openChallengeModal, matchRequest } =
   matchstore;
 
@@ -157,6 +165,7 @@ watch(matchList, (newList) => {
     hasData.value = false;
   }
 });
+
 onMounted(() => {
   // getUser();
   realTimeUser();

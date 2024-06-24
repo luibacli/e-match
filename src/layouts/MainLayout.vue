@@ -86,7 +86,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, onBeforeMount, onBeforeUnmount } from "vue";
+import { onMounted, ref, onBeforeMount, onBeforeUnmount, watch } from "vue";
 import LoginDialog from "src/components/LoginDialog.vue";
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "src/stores/authStore";
@@ -114,6 +114,7 @@ const {
   realTimeUser,
   getUser,
   unsubscribeRealTimeUser,
+  showAccepted,
 } = authStore;
 
 // const {} = storeToRefs(matchStore);
@@ -176,6 +177,10 @@ const leftDrawerOpen = ref(false);
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
+
+watch(() => {
+  showAccepted();
+});
 
 onMounted(() => {
   realTimeUser();

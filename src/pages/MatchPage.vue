@@ -18,7 +18,7 @@
               flat
               dense
               size="md"
-              label="Waiting..."
+              label="Requests"
               class="text-warning"
               @click="openChallengeRequestsModal"
               ><span class="text-yellow"><q-icon name="notifications" /></span>
@@ -243,7 +243,7 @@
                 dense
                 class="bg-positive"
                 size="sm"
-                @click="acceptRequest(request.id)"
+                @click="acceptRequest(request.id, request.challenger)"
                 ><q-icon name="check"
               /></q-btn>
               <q-btn flat dense class="bg-red" size="sm"
@@ -408,7 +408,7 @@
 <script setup>
 import { useMatchStore } from "src/stores/matchStore";
 import { useAuthStore } from "src/stores/authStore";
-import { onMounted, onBeforeUnmount } from "vue";
+import { onMounted, onBeforeUnmount, watch } from "vue";
 import { storeToRefs } from "pinia";
 const matchStore = useMatchStore();
 const authStore = useAuthStore();
@@ -452,6 +452,7 @@ const {
   confirmLeave,
   realTimeMatch,
   unsubscribeRealTimeMatch,
+  showRequest,
 } = matchStore;
 
 const teams = teamList;
@@ -460,6 +461,10 @@ const requests = requestList;
 onMounted(() => {
   loadTeams();
   realTimeMatch();
+});
+
+watch(() => {
+  showRequest();
 });
 
 onBeforeUnmount(() => {

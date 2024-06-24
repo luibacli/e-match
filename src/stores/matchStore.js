@@ -442,10 +442,11 @@ export const useMatchStore = defineStore("match", {
         console.error(error);
       }
     },
-    async acceptRequest(id) {
+    async acceptRequest(id, challenger) {
       try {
         const docRef = doc(db, "users", id);
         const matchRef = doc(db, "matches", this.routeMatch);
+        const objectToRemove = { id: `${id}`, challenger: `${challenger}` };
         await updateDoc(docRef, {
           isAccepted: true,
           matchAccepted: arrayUnion({
@@ -455,6 +456,7 @@ export const useMatchStore = defineStore("match", {
         });
         await updateDoc(matchRef, {
           acceptedId: arrayUnion(id),
+          requests: arrayRemove(objectToRemove),
         });
         this.challengeRequestsModal = false;
         Notify.create({
@@ -478,6 +480,7 @@ export const useMatchStore = defineStore("match", {
           await updateDoc(userRef, {
             isChallenger: true,
             matchAccepted: arrayRemove(objectToRemove),
+            currentMatchId: matchId,
           });
           await updateDoc(matchRef, {
             challengerRef: this.playerId,
@@ -496,6 +499,7 @@ export const useMatchStore = defineStore("match", {
     async confirmLeave() {
       try {
         const docRef = doc(db, "users", this.playerId);
+        const matchRef = doc(db, "matches", this.routeMatch);
         if (this.isHost) {
           await updateDoc(docRef, {
             isHost: false,
@@ -509,7 +513,11 @@ export const useMatchStore = defineStore("match", {
         if (this.isChallenger) {
           await updateDoc(docRef, {
             isChallenger: false,
+            currentMatchId: "",
+          });
+          await updateDoc(matchRef, {
             acceptedId: arrayRemove(authStore.user.id),
+            challengerRef: "",
           });
           this.matchLeaveModal = false;
           Notify.create({
@@ -533,15 +541,14 @@ export const useMatchStore = defineStore("match", {
               this.playerList = data.hosts || {};
               this.challengerList = data.challengers || {};
               this.requestList = data.requests || [];
-
-              this.requestBadge = this.requestList.length;
-              if (this.requestList.length > 0) {
-                this.isRequest = true;
-              } else {
-                this.isRequest = false;
-              }
             } else {
               console.log("No Data Found");
+            }
+            if (data.challenger) {
+              Notify.create({
+                color: "positive",
+                message: `${data.challenger} has joined  the match`,
+              });
             }
           },
 
@@ -564,6 +571,27 @@ export const useMatchStore = defineStore("match", {
     unsubscribeRealTimeMatch() {
       if (this.unsubscribeRealTimeMatch) {
         this.unsubscribeRealTimeMatch();
+      }
+    },
+    showRequest() {
+      try {
+        if (this.requestList) {
+          const data = this.requestList.length;
+          if (data > 0) {
+            this.requestBadge = data;
+            this.isRequest = true;
+            this.requestList.forEach((doc) => {
+              Notify.create({
+                color: "positive",
+                message: `${doc.challenger} would like to challenge you!`,
+              });
+            });
+          } else {
+            this.isRequest = false;
+          }
+        }
+      } catch (error) {
+        console.log(error);
       }
     },
     async ready() {
@@ -795,7 +823,10 @@ export const useMatchStore = defineStore("match", {
           this.matchId = docData.id;
           await setDoc(doc(db, "matches", newMatchId), docData);
           const userRef = doc(db, "users", authStore.user.id);
-          await updateDoc(userRef, { isHost: true });
+          await updateDoc(userRef, {
+            isHost: true,
+            currentMatchId: `${newMatchId}`,
+          });
           this.router.push(`/play/${this.matchId}`);
 
           this.isOpen = false;
@@ -863,9 +894,10 @@ export const useMatchStore = defineStore("match", {
         const data = docSnap.data();
         const acceptedData = data.acceptedId;
         const accepted = acceptedData.includes(this.playerId);
+        const hasIdRef = data.challengerRef;
         if (accepted && this.isHost) {
           this.router.push(`/play/${id}`);
-        } else if (accepted && !this.isHost) {
+        } else if (this.playerId == hasIdRef) {
           await updateDoc(userRef, {
             isChallenger: true,
           });
