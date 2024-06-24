@@ -458,7 +458,6 @@ const teams = teamList;
 const requests = requestList;
 
 onMounted(() => {
-  // getUser();
   loadTeams();
   realTimeMatch();
 });
@@ -466,9 +465,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   unsubscribeRealTimeMatch();
 });
-// onBeforeMount(() => {
-//   unsubscribeRealTimeMatch();
-// });
 </script>
 
 <style lang="scss" scoped></style>

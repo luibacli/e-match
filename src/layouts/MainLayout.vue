@@ -7,8 +7,33 @@
         ></q-btn>
 
         <q-tabs>
-          <q-tab label="Play" @click="btnPlay" />
-          <q-tab label="Ranks" :to="'/ranks'" />
+          <q-tab icon="sports_esports" @click="btnPlay" />
+
+          <q-tab icon="handshake" />
+          <q-tab icon="notifications"
+            ><q-menu class="bg-primary" style="width: 100%"
+              ><q-list v-for="match in matchAccepted" :key="match.id"
+                ><q-item class="row">
+                  <div class="co-12 text-warning">
+                    <span class="text-yellow">{{ match.hostName }} </span>
+                    accepted your request!
+                  </div>
+                  <div class="col text-right q-mr-md">
+                    <q-btn
+                      dense
+                      label="Join"
+                      class="bg-green text-secondary"
+                      @click="joinMatch(match.id, match.hostName)"
+                      size="sm"
+                    />
+                  </div> </q-item
+                ><q-separator /></q-list
+            ></q-menu>
+            <q-badge v-show="gotAccepted" floating color="red">{{
+              matchLength
+            }}</q-badge></q-tab
+          >
+
           <div
             class="row bg-warning q-mr-sm rounded-borders text-secondary"
             style="width: 100px"
@@ -65,9 +90,10 @@ import { onMounted, ref, onBeforeMount, onBeforeUnmount } from "vue";
 import LoginDialog from "src/components/LoginDialog.vue";
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "src/stores/authStore";
+import { useMatchStore } from "src/stores/matchStore";
 
 const authStore = useAuthStore();
-
+const matchStore = useMatchStore();
 const {
   isAuthenticated,
   profileName,
@@ -76,7 +102,10 @@ const {
   showLogin,
   userData,
   user,
+  matchAccepted,
   playerName,
+  matchLength,
+  gotAccepted,
 } = storeToRefs(authStore);
 const {
   btnPlay,
@@ -86,6 +115,9 @@ const {
   getUser,
   unsubscribeRealTimeUser,
 } = authStore;
+
+// const {} = storeToRefs(matchStore);
+const { joinMatch } = matchStore;
 defineOptions({
   name: "MainLayout",
 });
@@ -146,12 +178,11 @@ function toggleLeftDrawer() {
 }
 
 onMounted(() => {
-  // getUser();
   realTimeUser();
 });
 
 onBeforeUnmount(() => {
-  unsubscribeRealTimeMatch();
+  unsubscribeRealTimeUser();
 });
 </script>
 

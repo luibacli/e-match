@@ -14,6 +14,7 @@ import {
   deleteDoc,
   onSnapshot,
   arrayRemove,
+  FieldValue,
 } from "firebase/firestore";
 import { db } from "src/boot/firebase";
 
@@ -161,8 +162,14 @@ export const useMatchStore = defineStore("match", {
     isChallenger: () => {
       return authStore.userData.isChallenger;
     },
+    isAccepted: () => {
+      return authStore.userData.isAccepted;
+    },
     acceptedPlayers: (state) => {
       return state.matchData.acceptedId;
+    },
+    matchAccepted: () => {
+      return authStore.userData.matchAccepted;
     },
   },
   actions: {
@@ -440,7 +447,11 @@ export const useMatchStore = defineStore("match", {
         const docRef = doc(db, "users", id);
         const matchRef = doc(db, "matches", this.routeMatch);
         await updateDoc(docRef, {
-          isChallenger: true,
+          isAccepted: true,
+          matchAccepted: arrayUnion({
+            id: this.routeMatch,
+            hostName: authStore.user.name,
+          }),
         });
         await updateDoc(matchRef, {
           acceptedId: arrayUnion(id),
@@ -450,6 +461,34 @@ export const useMatchStore = defineStore("match", {
           color: "positive",
           message: "User's request challenge accepted",
         });
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async joinMatch(matchId, hostName) {
+      try {
+        const userRef = doc(db, "users", authStore.user.id);
+        const matchRef = doc(db, "matches", matchId);
+        const docSnap = await getDoc(matchRef);
+        const data = docSnap.data();
+        const acceptedData = data.acceptedId;
+        const accepted = acceptedData.includes(this.playerId);
+        const objectToRemove = { hostName: `${hostName}`, id: `${matchId}` };
+        if (accepted) {
+          await updateDoc(userRef, {
+            isChallenger: true,
+            matchAccepted: arrayRemove(objectToRemove),
+          });
+          await updateDoc(matchRef, {
+            challengerRef: this.playerId,
+          });
+
+          this.router.push(`/play/${matchId}`);
+          Notify.create({
+            color: "positive",
+            message: "You are now in the match room!",
+          });
+        }
       } catch (error) {
         console.error(error);
       }
@@ -494,7 +533,7 @@ export const useMatchStore = defineStore("match", {
               this.playerList = data.hosts || {};
               this.challengerList = data.challengers || {};
               this.requestList = data.requests || [];
-              console.log("requests", this.requestList);
+
               this.requestBadge = this.requestList.length;
               if (this.requestList.length > 0) {
                 this.isRequest = true;
@@ -706,7 +745,7 @@ export const useMatchStore = defineStore("match", {
       //   throw new Error("Player ID not found");
       // }
       try {
-        if (!this.isHost) {
+        if (!this.isHost && !this.isChallenger) {
           const counterRef = doc(db, "counters", "matchCounter");
 
           const counterDoc = await getDoc(counterRef);
@@ -765,14 +804,14 @@ export const useMatchStore = defineStore("match", {
             color: "positive",
             message: "Match has been created, please wait for challengers",
           });
-        } else if (this.isHost || this.isChallenger) {
+        } else if (this.isHost) {
           Notify.create({
             icon: "announcement",
             color: "warning",
             textColor: "dark",
             message: "You already created a match!",
           });
-        } else {
+        } else if (this.isChallenger) {
           Notify.create({
             icon: "announcement",
             color: "warning",
@@ -815,6 +854,7 @@ export const useMatchStore = defineStore("match", {
       this.teamId = id;
       this.teamDeleteModal = true;
     },
+
     async openChallengeModal(id, host) {
       try {
         const docRef = doc(db, "matches", id);
@@ -829,6 +869,7 @@ export const useMatchStore = defineStore("match", {
           await updateDoc(userRef, {
             isChallenger: true,
           });
+
           this.router.push(`/play/${id}`);
         } else {
           this.matchId = id;

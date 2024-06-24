@@ -33,6 +33,7 @@ export const useAuthStore = defineStore("auth", {
       balance: 0,
       wins: 0,
       loss: 0,
+      matchAccepted: [],
       isAdmin: false,
       isHost: false,
       isChallenger: false,
@@ -56,6 +57,9 @@ export const useAuthStore = defineStore("auth", {
     //   isAccepted: false,
     // }),
     userData: {},
+    matchAccepted: [],
+    matchLength: 0,
+    gotAccepted: false,
     profileName: ref(""),
     showLogin: ref(false),
     isOpen: false,
@@ -175,6 +179,22 @@ export const useAuthStore = defineStore("auth", {
               this.userData = data || {};
               this.user.id = data.id;
               this.user.name = data.displayName;
+              this.matchAccepted = data.matchAccepted;
+              if (this.matchAccepted.length > 0) {
+                this.gotAccepted = true;
+                this.matchLength = this.matchAccepted.length;
+              } else {
+                this.gotAccepted = false;
+              }
+              this.matchAccepted.forEach((doc) => {
+                if (doc) {
+                  Notify.create({
+                    color: "indigo",
+                    message: `${doc.hostName} accepted your request`,
+                    position: "top-left",
+                  });
+                }
+              });
             } else {
               throw new Error("Error fetching user");
             }

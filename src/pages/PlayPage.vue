@@ -2,6 +2,9 @@
   <div v-if="pageLoading"></div>
   <q-page v-else>
     <div v-if="isAuthenticated">
+      <div class="row">
+        <div class="col text-warning text-center">Hello</div>
+      </div>
       <gameCards />
       <CreateMatch :isOpen="isOpen" @update:isOpen="isOpen = $event" />
 
