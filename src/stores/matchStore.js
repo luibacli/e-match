@@ -174,6 +174,9 @@ export const useMatchStore = defineStore("match", {
     matchAccepted: () => {
       return authStore.userData.matchAccepted;
     },
+    playerBalance: () => {
+      return authStore.userData.balance;
+    },
   },
   actions: {
     async getMatches() {
@@ -793,72 +796,78 @@ export const useMatchStore = defineStore("match", {
     },
     async createMatch() {
       this.tableLoading = true;
-      // if (this.playerId) {
-      //   throw new Error("Player ID not found");
-      // }
+
       try {
         if (!this.isHost && !this.isChallenger) {
-          const counterRef = doc(db, "counters", "matchCounter");
+          if (this.playerBalance >= this.match.bet) {
+            if (this.host) {
+              this.storedName = this.host;
+            } else {
+              console.log("no display name found");
+            }
 
-          const counterDoc = await getDoc(counterRef);
+            const docData = {
+              id: `${newMatchId}`,
+              host: this.host,
+              challenger: "",
+              userRef: `${authStore.user.id}`,
+              challengerRef: "",
+              game: this.match.game,
+              type: this.match.type,
+              bet: this.match.bet,
+              acceptedId: [`${authStore.user.id}`],
+              gameLobbyId: "",
+              hosts: [],
+              challengers: [],
+              challengerReady: false,
+              isStart: false,
+              totalBet: 0,
+              gameLobbyHosts: [],
+              gameLobbyChallengers: [],
+              requests: [],
+              gameTime: "",
+              winner: "Pending",
+              status: "Open",
+              timestamp: serverTimestamp(),
+            };
+            this.matchId = docData.id;
 
-          if (!counterDoc.exists) {
-            throw new Error("Counter document does not exist!");
-          }
+            const counterRef = doc(db, "counters", "matchCounter");
 
-          let matchCounter = counterDoc.data().counter;
+            const counterDoc = await getDoc(counterRef);
 
-          matchCounter += 1;
+            if (!counterDoc.exists) {
+              throw new Error("Counter document does not exist!");
+            }
 
-          await updateDoc(counterRef, { counter: matchCounter });
+            let matchCounter = counterDoc.data().counter;
 
-          const newMatchId = matchCounter.toString();
+            matchCounter += 1;
 
-          if (this.host) {
-            this.storedName = this.host;
+            await updateDoc(counterRef, { counter: matchCounter });
+
+            const newMatchId = matchCounter.toString();
+
+            await setDoc(doc(db, "matches", newMatchId), docData);
+            const userRef = doc(db, "users", authStore.user.id);
+            await updateDoc(userRef, {
+              isHost: true,
+              currentMatchId: `${newMatchId}`,
+            });
+            this.router.push(`/play/${this.matchId}`);
+
+            this.isOpen = false;
+            this.tableLoading = false;
+            Notify.create({
+              color: "positive",
+              message: "Match has been created, please wait for challengers",
+            });
           } else {
-            console.log("no display name found");
+            Notify.create({
+              color: "negative",
+              message: "You don't have enough balance to create this match.",
+            });
           }
-
-          const docData = {
-            id: `${newMatchId}`,
-            host: this.host,
-            challenger: "",
-            userRef: `${authStore.user.id}`,
-            challengerRef: "",
-            game: this.match.game,
-            type: this.match.type,
-            bet: this.match.bet,
-            acceptedId: [`${authStore.user.id}`],
-            gameLobbyId: "",
-            hosts: [],
-            challengers: [],
-            challengerReady: false,
-            isStart: false,
-            totalBet: 0,
-            gameLobbyHosts: [],
-            gameLobbyChallengers: [],
-            requests: [],
-            gameTime: "",
-            winner: "Pending",
-            status: "Open",
-            timestamp: serverTimestamp(),
-          };
-          this.matchId = docData.id;
-          await setDoc(doc(db, "matches", newMatchId), docData);
-          const userRef = doc(db, "users", authStore.user.id);
-          await updateDoc(userRef, {
-            isHost: true,
-            currentMatchId: `${newMatchId}`,
-          });
-          this.router.push(`/play/${this.matchId}`);
-
-          this.isOpen = false;
-          this.tableLoading = false;
-          Notify.create({
-            color: "positive",
-            message: "Match has been created, please wait for challengers",
-          });
         } else if (this.isHost) {
           Notify.create({
             icon: "announcement",
@@ -917,21 +926,28 @@ export const useMatchStore = defineStore("match", {
         const userRef = doc(db, "users", this.playerId);
         const docSnap = await getDoc(docRef);
         const data = docSnap.data();
-        const acceptedData = data.acceptedId;
-        const accepted = acceptedData.includes(this.playerId);
-        const hasIdRef = data.challengerRef;
-        if (accepted && this.isHost) {
-          this.router.push(`/play/${id}`);
-        } else if (this.playerId == hasIdRef) {
-          await updateDoc(userRef, {
-            isChallenger: true,
-          });
+        if (this.playerBalance >= data.bet) {
+          const acceptedData = data.acceptedId;
+          const accepted = acceptedData.includes(this.playerId);
+          const hasIdRef = data.challengerRef;
+          if (accepted && this.isHost) {
+            this.router.push(`/play/${id}`);
+          } else if (this.playerId == hasIdRef) {
+            await updateDoc(userRef, {
+              isChallenger: true,
+            });
 
-          this.router.push(`/play/${id}`);
+            this.router.push(`/play/${id}`);
+          } else {
+            this.matchId = id;
+            this.hostName = host;
+            this.challengeModal = true;
+          }
         } else {
-          this.matchId = id;
-          this.hostName = host;
-          this.challengeModal = true;
+          Notify.create({
+            color: "negative",
+            message: "You don't have enough balance to challenge this match.",
+          });
         }
       } catch (error) {
         Notify.create({

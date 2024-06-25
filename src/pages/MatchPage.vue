@@ -45,6 +45,12 @@
             </div>
           </q-card-section>
           <q-card-section
+            ><div class="text-subtitle2">
+              Total Bet:
+              <span class="text-positive">{{ matchData.totalBet }}</span>
+            </div>
+          </q-card-section>
+          <q-card-section
             ><div class="text-subtitle2">e-match ID: {{ matchData.id }}</div>
           </q-card-section>
         </q-card-section>
