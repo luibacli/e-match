@@ -896,7 +896,6 @@ export const useMatchStore = defineStore("match", {
     },
     openLeaveModal() {
       this.matchLeaveModal = true;
-      // console.log("route", this.routeMatch);
     },
     openChallengeRequestsModal() {
       this.challengeRequestsModal = true;
@@ -955,10 +954,6 @@ export const useMatchStore = defineStore("match", {
           message: error.message,
         });
       }
-
-      // this.matchId = id;
-      // this.hostName = host;
-      // this.challengeModal = true;
     },
     clearPlayers() {
       this.playerList.team = "";

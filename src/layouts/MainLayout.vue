@@ -1,10 +1,13 @@
 <template>
-  <q-layout view="lHh Lpr lFf" style="background-color: #363062">
+  <q-layout view="hHh lpR fFf" style="background-color: #363062">
     <q-header elevated>
       <q-toolbar class="text-warning justify-between">
-        <q-btn flat :to="'/'">
-          <q-avatar size="45px"><img src="images/logo-1.png" /></q-avatar
-        ></q-btn>
+        <q-btn dense flat icon="menu" @click="toggleLeftDrawer" />
+        <q-toolbar-title>
+          <q-btn flat :to="'/'">
+            <q-avatar size="45px"><img src="images/logo-1.png" /></q-avatar
+          ></q-btn>
+        </q-toolbar-title>
 
         <q-tabs>
           <q-tab icon="sports_esports" @click="btnPlay" />
@@ -73,6 +76,29 @@
       </q-toolbar>
     </q-header>
     <div><q-btn label="EvaTest" class="bg-warning" /></div>
+
+    <!-- drawer -->
+    <q-drawer
+      show-if-above
+      v-model="leftDrawerOpen"
+      side="left"
+      elevated
+      behavior="normal"
+      class="bg-primary text-warning"
+    >
+      <!-- drawer content -->
+      <q-list>
+        <q-item-label header class="text-warning text-bold">
+          Menu
+        </q-item-label>
+        <EssentialLink
+          v-for="link in linksList"
+          :key="link.title"
+          v-bind="link"
+        />
+      </q-list>
+    </q-drawer>
+
     <!-- Login / Register -->
     <login-dialog :modelValue="isOpen" @update:modelValue="isOpen = $event" />
     <div v-if="isLoading" class="text-center absolute-center">
@@ -88,6 +114,7 @@
 <script setup>
 import { onMounted, ref, onBeforeMount, onBeforeUnmount, watch } from "vue";
 import LoginDialog from "src/components/LoginDialog.vue";
+import EssentialLink from "src/components/EssentialLink.vue";
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "src/stores/authStore";
 import { useMatchStore } from "src/stores/matchStore";
@@ -129,46 +156,40 @@ const fullHeight = ref(false);
 
 const linksList = [
   {
-    title: "Docs",
-    caption: "quasar.dev",
-    icon: "school",
+    title: "Profile",
+
+    icon: "person",
     link: "https://quasar.dev",
   },
   {
-    title: "Github",
-    caption: "github.com/quasarframework",
-    icon: "code",
+    title: "Cashin",
+
+    icon: "add_card",
+    link: "https://quasar.dev",
+  },
+  {
+    title: "Cashout",
+
+    icon: "shopping_cart_checkout",
     link: "https://github.com/quasarframework",
   },
   {
-    title: "Discord Chat Channel",
-    caption: "chat.quasar.dev",
-    icon: "chat",
+    title: "Referral Earn",
+
+    icon: "transfer_within_a_station",
     link: "https://chat.quasar.dev",
   },
   {
-    title: "Forum",
-    caption: "forum.quasar.dev",
-    icon: "record_voice_over",
+    title: "Customer Support 24/7",
+
+    icon: "support_agent",
     link: "https://forum.quasar.dev",
   },
   {
-    title: "Twitter",
-    caption: "@quasarframework",
-    icon: "rss_feed",
-    link: "https://twitter.quasar.dev",
-  },
-  {
-    title: "Facebook",
-    caption: "@QuasarFramework",
-    icon: "public",
-    link: "https://facebook.quasar.dev",
-  },
-  {
-    title: "Quasar Awesome",
-    caption: "Community Quasar projects",
-    icon: "favorite",
-    link: "https://awesome.quasar.dev",
+    title: "Logout",
+
+    icon: "logout",
+    link: "https://forum.quasar.dev",
   },
 ];
 
