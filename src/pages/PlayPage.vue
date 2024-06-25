@@ -167,7 +167,6 @@ watch(matchList, (newList) => {
 });
 
 onMounted(() => {
-  // getUser();
   realTimeUser();
   showLoading();
 });

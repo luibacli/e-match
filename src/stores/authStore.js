@@ -209,7 +209,7 @@ export const useAuthStore = defineStore("auth", {
       try {
         if (this.matchAccepted) {
           const data = this.matchAccepted.length;
-          if (data.length > 0) {
+          if (data > 0) {
             this.matchLength = data;
             this.gotAccepted = true;
             this.matchAccepted.forEach((doc) => {

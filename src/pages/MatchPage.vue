@@ -30,6 +30,7 @@
           <div v-show="matchData.challengerReady" class="col text-right">
             <span class="text-red">{{ matchData.challenger }}</span>
             is now ready!
+
             <q-icon name="check_circle" class="text-green" size="md" />
           </div>
         </div>
@@ -76,7 +77,7 @@
                 ><img src="https://cdn.quasar.dev/img/avatar.png"
               /></q-avatar>
               <span class="text-bold q-ml-md text-blue">
-                {{ playerList.name }}
+                {{ matchData.host }}
               </span>
 
               <div v-if="playerList" class="row justify-center">
@@ -93,7 +94,7 @@
                 ><img src="https://cdn.quasar.dev/img/avatar.png"
               /></q-avatar>
               <span class="text-bold q-ml-md text-red">
-                {{ challengerList.name }}</span
+                {{ matchData.challenger }}</span
               >
 
               <div v-if="challengerList" class="row justify-center">
@@ -397,7 +398,6 @@
               label="Confirm"
               class="bg-positive"
               @click="confirmLeave"
-              :to="'/play'"
               flat
               dense
             /></div></q-card-section></q-card
@@ -407,9 +407,12 @@
 
 <script setup>
 import { useMatchStore } from "src/stores/matchStore";
-import { useAuthStore } from "src/stores/authStore";
-import { onMounted, onBeforeUnmount, watch } from "vue";
+import { onMounted, onBeforeUnmount, watch, ref } from "vue";
 import { storeToRefs } from "pinia";
+import { useQuasar } from "quasar";
+import { useAuthStore } from "src/stores/authStore";
+
+const $q = useQuasar();
 const matchStore = useMatchStore();
 const authStore = useAuthStore();
 const { getUser } = authStore;
@@ -427,10 +430,13 @@ const {
   teamDeleteModal,
   matchLeaveModal,
   challengeRequestsModal,
+  challenger,
   challengerList,
   isHost,
   isChallenger,
   isRequest,
+
+  isJoin,
   requestBadge,
   btnDisable,
 } = storeToRefs(matchStore);
@@ -453,18 +459,29 @@ const {
   realTimeMatch,
   unsubscribeRealTimeMatch,
   showRequest,
+  showChallenger,
 } = matchStore;
 
 const teams = teamList;
 const requests = requestList;
-
+let hasJoin = ref(false);
+let initialLoad = ref(true);
+let chal = matchData.challenger;
 onMounted(() => {
   loadTeams();
   realTimeMatch();
-});
-
-watch(() => {
   showRequest();
+  showChallenger();
+});
+watch(requestList, (newVal, oldVal) => {
+  if (newVal !== oldVal) {
+    showRequest();
+  }
+});
+watch(challenger, (newVal, oldVal) => {
+  if (newVal !== oldVal) {
+    showChallenger();
+  }
 });
 
 onBeforeUnmount(() => {

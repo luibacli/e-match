@@ -178,8 +178,10 @@ function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
 
-watch(() => {
-  showAccepted();
+watch(matchAccepted, (newVal, oldVal) => {
+  if (newVal !== oldVal) {
+    showAccepted();
+  }
 });
 
 onMounted(() => {

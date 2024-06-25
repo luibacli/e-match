@@ -22,6 +22,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "./authStore";
 
 import { Notify } from "quasar";
+import { data } from "autoprefixer";
 const authStore = useAuthStore();
 // const { playerId, playerName } = storeToRefs(authStore);
 
@@ -57,6 +58,7 @@ export const useMatchStore = defineStore("match", {
     //   timestamp: "",
     // },
     matchData: {},
+    challenger: "",
     accepted: [],
     userId: "",
     matchId: "",
@@ -67,6 +69,7 @@ export const useMatchStore = defineStore("match", {
     requestList: [],
     requestBadge: 0,
     isRequest: false,
+    isJoin: false,
     teamData: {
       id: "",
       name: "",
@@ -484,6 +487,7 @@ export const useMatchStore = defineStore("match", {
           });
           await updateDoc(matchRef, {
             challengerRef: this.playerId,
+            challenger: this.playerName,
           });
 
           this.router.push(`/play/${matchId}`);
@@ -499,12 +503,14 @@ export const useMatchStore = defineStore("match", {
     async confirmLeave() {
       try {
         const docRef = doc(db, "users", this.playerId);
-        const matchRef = doc(db, "matches", this.routeMatch);
+        const matchRef = doc(db, "matches", this.matchData.id);
         if (this.isHost) {
           await updateDoc(docRef, {
             isHost: false,
+            currentMatchId: "",
           });
           this.matchLeaveModal = false;
+          this.router.push("/play");
           Notify.create({
             color: "positive",
             message: "You left the match and it has been deleted",
@@ -518,8 +524,13 @@ export const useMatchStore = defineStore("match", {
           await updateDoc(matchRef, {
             acceptedId: arrayRemove(authStore.user.id),
             challengerRef: "",
+            challenger: null,
+            challengers: null,
+            challengerReady: false,
           });
+
           this.matchLeaveModal = false;
+          this.router.push("/play");
           Notify.create({
             color: "positive",
             message: "You left the match",
@@ -538,17 +549,12 @@ export const useMatchStore = defineStore("match", {
             const data = docSnapShot.data();
             if (data) {
               this.matchData = data || {};
+              this.challenger = data.challenger;
               this.playerList = data.hosts || {};
               this.challengerList = data.challengers || {};
               this.requestList = data.requests || [];
             } else {
               console.log("No Data Found");
-            }
-            if (data.challenger) {
-              Notify.create({
-                color: "positive",
-                message: `${data.challenger} has joined  the match`,
-              });
             }
           },
 
@@ -594,13 +600,31 @@ export const useMatchStore = defineStore("match", {
         console.log(error);
       }
     },
+
+    showChallenger() {
+      try {
+        if (this.isHost) {
+          if (this.challenger) {
+            this.isJoin = true;
+            Notify.create({
+              color: "positive",
+              message: `${this.challenger} the challenger is now in lobby`,
+            });
+          } else if (this.challenger == null) {
+            Notify.create({
+              color: "negative",
+              message: "The challenger has left the lobby",
+            });
+          }
+        }
+      } catch (error) {}
+    },
+
     async ready() {
       try {
         const docRef = doc(db, "matches", this.routeMatch);
-
         await updateDoc(docRef, {
           challengerReady: true,
-          challenger: authStore.user.name,
         });
       } catch (error) {
         console.log(error);
@@ -863,6 +887,7 @@ export const useMatchStore = defineStore("match", {
     },
     openLeaveModal() {
       this.matchLeaveModal = true;
+      // console.log("route", this.routeMatch);
     },
     openChallengeRequestsModal() {
       this.challengeRequestsModal = true;
@@ -935,6 +960,14 @@ export const useMatchStore = defineStore("match", {
       this.teamData.member3 = "";
       this.teamData.member4 = "";
       this.teamData.member5 = "";
+    },
+    clearChallengers() {
+      this.challengerList.team = "";
+      this.challengerList.member1 = "";
+      this.challengerList.member2 = "";
+      this.challengerList.member3 = "";
+      this.challengerList.member4 = "";
+      this.challengerList.member5 = "";
     },
   },
 });
