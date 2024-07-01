@@ -10,26 +10,16 @@ const routes = [
       {
         path: "/",
         component: () => import("pages/IndexPage.vue"),
-        meta: {
-          requiresAuth: false,
-        },
       },
-
       {
         path: "play",
         component: () => import("pages/PlayPage.vue"),
-        meta: {
-          requiresAuth: true,
-        },
       },
       {
         path: "play/:matchId",
         component: () => import("pages/MatchPage.vue"),
-        meta: {
-          requiresAuth: true,
-        },
       },
-      { path: "ranks", component: () => import("pages/RankingPage.vue") },
+      { path: "cashin", component: () => import("pages/CashinPage.vue") },
     ],
   },
   // {

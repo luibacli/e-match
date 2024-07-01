@@ -165,7 +165,7 @@ const linksList = [
     title: "Cashin",
 
     icon: "add_card",
-    link: "https://quasar.dev",
+    link: "/cashin",
   },
   {
     title: "Cashout",

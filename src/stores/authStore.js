@@ -38,6 +38,8 @@ export const useAuthStore = defineStore("auth", {
       isHost: false,
       isChallenger: false,
       isAccepted: false,
+      isOnline: false,
+      status: "active",
     }),
     user: {
       id: "",
@@ -139,6 +141,7 @@ export const useAuthStore = defineStore("auth", {
       onAuthStateChanged(auth, (user) => {
         if (user) {
           this.isAuthenticated = true;
+          this.userData.isOnline = true;
           this.user.name = user.displayName;
           this.user.id = user.uid;
         } else {
@@ -150,24 +153,20 @@ export const useAuthStore = defineStore("auth", {
         }
       });
     },
+
     async getUser() {
       try {
-        if (!this.user.id) {
-          throw new Error("User ID is not defined");
-        }
-        console.log("user id:", this.user.id);
-
         const docRef = doc(db, "users", this.user.id);
         const docSnap = await getDoc(docRef);
+        const data = docSnap.data();
 
-        if (docSnap.exists()) {
-          this.userData = docSnap.data() || {};
+        if (data) {
+          this.userData = data || {};
         } else {
-          console.log("No such document!");
-          this.userData = {};
+          throw new Error("Data not found");
         }
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        console.error(error);
       }
     },
 
@@ -232,6 +231,7 @@ export const useAuthStore = defineStore("auth", {
     async logout() {
       await signOut(auth);
       this.isAuthenticated = false;
+      this.userData.isOnline = false;
       this.router.push("/");
     },
 

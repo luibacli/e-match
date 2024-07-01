@@ -7,6 +7,8 @@ import {
 } from "vue-router";
 import routes from "./routes";
 import { useAuthStore } from "src/stores/authStore";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "src/boot/firebase";
 
 /*
  * If not building with SSR mode, you can
@@ -35,16 +37,11 @@ export default route(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
 
-  Router.beforeEach(async (to, from, next) => {
-    const authStore = useAuthStore();
-    if (!to.meta.requiresAuth) {
-      return next();
-    }
-
-    if (to.name !== "/" && !authStore.isAuthenticated) next({ name: "/" });
-    else next();
-
-    // if(authStore.isAuthenticated)
+  Router.beforeEach((to, from, next) => {
+    onAuthStateChanged(auth, (user) => {
+      if (to.path !== "/" && !user) next({ path: "/" });
+      else next();
+    });
   });
 
   return Router;
