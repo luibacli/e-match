@@ -1,6 +1,19 @@
 <template>
   <q-page>
-    <div class="q-pa-md">
+    <div v-show="pendingCashin" class="justify-center text-warning">
+      <div class="row justify-center text-center text-warning text-h4">
+        Your requested amount is being processed, waiting for approval!
+      </div>
+      <div class="row justify-center q-pa-md">
+        <q-spinner-puff size="5.5em" />
+      </div>
+    </div>
+
+    <div v-if="cashinLoading" class="col text-center text-warning">
+      <q-spinner-puff size="5.5em" />
+    </div>
+
+    <div v-else v-show="!pendingCashin" class="q-pa-md">
       <q-stepper
         v-model="step"
         ref="stepper"
@@ -138,16 +151,18 @@
           icon="add_comment"
           style="min-height: 200px"
         >
-          Try out different ad text to see what brings in the most customers,
-          and learn how to enhance your ads using features like ad extensions.
-          If you run into any problems with your ads, find out how to tell if
-          they're running and how to resolve approval issues.
+          <q-uploader
+            style="max-width: 300px"
+            @added="uploadFiles"
+            label="Restricted to images"
+            accept=".jpg, .png, image/*"
+          />
         </q-step>
 
         <template v-slot:navigation>
           <q-stepper-navigation>
             <q-btn
-              @click="step === 3 ? finishBtn() : nextBtn($refs)"
+              @click="step === 3 ? cashIn() : nextBtn($refs)"
               color="positive"
               :label="step === 3 ? 'Finish' : 'Continue'"
             />
@@ -185,16 +200,20 @@
 <script setup>
 import { useCashStore } from "src/stores/cashStore";
 import { storeToRefs } from "pinia";
-import { ref } from "vue";
+import { ref, onMounted, onBeforeUnmount, onBeforeMount } from "vue";
 import { useQuasar } from "quasar";
+import { useAuthStore } from "src/stores/authStore";
 
 const $q = useQuasar();
 const cashStore = useCashStore();
+const authStore = useAuthStore();
 const step = ref(1);
 
-const { cashinForm } = storeToRefs(cashStore);
-const { cashIn } = cashStore;
+const { cashinForm, cashinLoading, pendingCashin, userCashin } =
+  storeToRefs(cashStore);
+const { cashIn, uploadFiles } = cashStore;
 
+const { realTimeUser, unsubscribeRealTimeUser } = authStore;
 function nextBtn($refs) {
   if (cashinForm.value.amount && cashinForm.value.channel) {
     $refs.stepper.next();
@@ -210,6 +229,15 @@ function nextBtn($refs) {
 function finishBtn() {
   console.log("This is finish");
 }
+
+onMounted(() => {
+  realTimeUser();
+  console.log("pending", userCashin.value);
+});
+
+onBeforeUnmount(() => {
+  unsubscribeRealTimeUser();
+});
 </script>
 
 <style lang="scss" scoped></style>

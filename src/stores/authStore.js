@@ -91,6 +91,7 @@ export const useAuthStore = defineStore("auth", {
         );
         const user = userCredential.user;
         if (user) {
+          await this.getUser(user.uid);
           this.isOpen = false;
           this.router.push("/play");
           this.isLoading = false;
@@ -154,9 +155,9 @@ export const useAuthStore = defineStore("auth", {
       });
     },
 
-    async getUser() {
+    async getUser(id) {
       try {
-        const docRef = doc(db, "users", this.user.id);
+        const docRef = doc(db, "users", id);
         const docSnap = await getDoc(docRef);
         const data = docSnap.data();
 

@@ -1,7 +1,15 @@
-import { addDoc, collection, doc, getDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
 import { defineStore } from "pinia";
 import { db } from "src/boot/firebase";
 import { useAuthStore } from "./authStore";
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
+import { v4 as uuidv4 } from "uuid";
+import { Notify } from "quasar";
 const authStore = useAuthStore();
 export const useCashStore = defineStore("cash", {
   state: () => ({
@@ -10,6 +18,7 @@ export const useCashStore = defineStore("cash", {
       sender: "",
       receiver: null,
       screenshot: "",
+      screenshotFile: null,
       channel: null,
     },
     cashoutForm: {
@@ -18,10 +27,22 @@ export const useCashStore = defineStore("cash", {
       receiver: "",
       screenshot: "",
     },
+    gcashMobile: 9672198311,
+    mayaMobile: 9672198322,
+    pendingCashin: false,
+    pendingCashout: false,
+    cashinLoading: false,
+    cashoutLoading: false,
   }),
+  getters: {
+    userCashin: (state) => {
+      return (state.pendingCashin = authStore.userData.hasPendingCashin);
+    },
+  },
 
   actions: {
     async cashIn() {
+      this.cashinLoading = true;
       try {
         const collectionRef = collection(db, "cashin");
         const userRef = doc(db, "users", authStore.user.id);
@@ -29,15 +50,87 @@ export const useCashStore = defineStore("cash", {
         const data = userSnap.data();
         const formData = {
           amount: this.cashinForm.amount,
-          sender: `${data.displayName}`,
+          channel: this.cashinForm.channel,
+          sender: `${authStore.user.name}`,
           balance: `${data.balance}`,
-          receiver: this.cashinForm.receiver,
-          screenshot: "",
+          receiver:
+            this.cashinForm.channel == "Gcash"
+              ? this.gcashMobile
+              : this.mayaMobile,
+          screenshot: this.cashinForm.screenshot,
+          userRef: authStore.user.id,
+          status: "pending",
         };
-        await addDoc(collectionRef, formData);
+        if (this.cashinForm.screenshot) {
+          await addDoc(collectionRef, formData);
+          await updateDoc(userRef, {
+            hasPendingCashin: true,
+          });
+
+          Notify.create({
+            color: "positive",
+            message: "Cashin requested successfully, please wait for approval",
+          });
+        } else {
+          Notify.create({
+            color: "negative",
+            message: "Error uploading screenshot, please try again",
+            position: "top",
+          });
+        }
+        this.cashinLoading = false;
       } catch (error) {
         console.error(error);
       }
+    },
+
+    async uploadFiles(files) {
+      const uploadPromises = files.map((file) => this.storeImage(file));
+      const downloadURLS = await Promise.all(uploadPromises);
+      console.log(downloadURLS);
+      if (downloadURLS.length > 0) {
+        this.cashinForm.screenshot = downloadURLS[0];
+      }
+    },
+
+    async storeImage(image) {
+      return new Promise((resolve, reject) => {
+        const storage = getStorage();
+        const fileName = `${authStore.user.id}-${image.name}-${uuidv4()}`;
+        const storageRef = ref(storage, "cashin/" + fileName);
+
+        const uploadTask = uploadBytesResumable(storageRef, image);
+
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log("Upload is " + progress + "% done");
+            switch (snapshot.state) {
+              case "paused":
+                console.log("Upload is paused");
+                break;
+              case "running":
+                console.log("Upload is running");
+                break;
+            }
+          },
+          (error) => {
+            reject(error);
+          },
+          () => {
+            // Ensure getDownloadURL is called after upload completes
+            getDownloadURL(uploadTask.snapshot.ref)
+              .then((downloadURL) => {
+                resolve(downloadURL);
+              })
+              .catch((error) => {
+                reject(error);
+              });
+          }
+        );
+      });
     },
   },
 });
