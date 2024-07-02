@@ -118,9 +118,10 @@ export const useCashStore = defineStore("cash", {
         };
 
         if (data.balance >= this.cashoutForm.amount) {
-          await addDoc(collectionRef);
+          await addDoc(collectionRef, formData);
           await updateDoc(userRef, {
             hasPendingCashout: true,
+            balance: data.balance - this.cashoutForm.amount,
           });
           Notify.create({
             color: "positive",

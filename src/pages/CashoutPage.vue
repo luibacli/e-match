@@ -109,6 +109,7 @@ const { realTimeUser, unsubscribeRealTimeUser } = authStore;
 onMounted(() => {
   realTimeUser();
   userCashout.value;
+  pendingCashout;
 });
 
 onBeforeUnmount(() => {

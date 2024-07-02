@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.16.4",
+    "dotenv": "^16.4.5",
     "firebase": "^10.12.2",
     "pinia": "^2.1.7",
     "quasar": "^2.16.0",

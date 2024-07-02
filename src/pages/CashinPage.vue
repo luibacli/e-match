@@ -200,7 +200,7 @@
 <script setup>
 import { useCashStore } from "src/stores/cashStore";
 import { storeToRefs } from "pinia";
-import { ref, onMounted, onBeforeUnmount, onBeforeMount } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 import { useQuasar } from "quasar";
 import { useAuthStore } from "src/stores/authStore";
 
@@ -229,6 +229,13 @@ function nextBtn($refs) {
 onMounted(() => {
   realTimeUser();
   userCashin.value;
+  pendingCashin;
+});
+
+watch(pendingCashin, (newVal, oldVal) => {
+  if (newVal !== oldVal) {
+    return pendingCashin;
+  }
 });
 
 onBeforeUnmount(() => {
