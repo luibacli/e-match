@@ -20,6 +20,13 @@ const routes = [
         component: () => import("pages/MatchPage.vue"),
       },
       { path: "cashin", component: () => import("pages/CashinPage.vue") },
+      { path: "cashout", component: () => import("pages/CashoutPage.vue") },
+      { path: "profile", component: () => import("pages/ProfilePage.vue") },
+      { path: "referral", component: () => import("pages/ReferralPage.vue") },
+      {
+        path: "customersupport",
+        component: () => import("pages/SupportPage.vue"),
+      },
     ],
   },
   // {

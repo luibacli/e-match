@@ -96,6 +96,14 @@
           :key="link.title"
           v-bind="link"
         />
+        <q-item clickable @click="logout">
+          <q-item-section>
+            <div class="row">
+              <q-icon name="logout" avatar size="sm" />
+              <q-item-label class="col-5 text-center">Logout</q-item-label>
+            </div>
+          </q-item-section>
+        </q-item>
       </q-list>
     </q-drawer>
 
@@ -159,37 +167,31 @@ const linksList = [
     title: "Profile",
 
     icon: "person",
-    link: "https://quasar.dev",
+    link: "profile",
   },
   {
     title: "Cashin",
 
     icon: "add_card",
-    link: "/cashin",
+    link: "cashin",
   },
   {
     title: "Cashout",
 
     icon: "shopping_cart_checkout",
-    link: "https://github.com/quasarframework",
+    link: "cashout",
   },
   {
     title: "Referral Earn",
 
     icon: "transfer_within_a_station",
-    link: "https://chat.quasar.dev",
+    link: "referral",
   },
   {
     title: "Customer Support 24/7",
 
     icon: "support_agent",
-    link: "https://forum.quasar.dev",
-  },
-  {
-    title: "Logout",
-
-    icon: "logout",
-    link: "https://forum.quasar.dev",
+    link: "customersupport",
   },
 ];
 

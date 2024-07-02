@@ -1,4 +1,11 @@
-import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  serverTimestamp,
+  updateDoc,
+} from "firebase/firestore";
 import { defineStore } from "pinia";
 import { db } from "src/boot/firebase";
 import { useAuthStore } from "./authStore";
@@ -25,7 +32,7 @@ export const useCashStore = defineStore("cash", {
       amount: 0,
       sender: "",
       receiver: "",
-      screenshot: "",
+      channel: null,
     },
     gcashMobile: 9672198311,
     mayaMobile: 9672198322,
@@ -37,6 +44,9 @@ export const useCashStore = defineStore("cash", {
   getters: {
     userCashin: (state) => {
       return (state.pendingCashin = authStore.userData.hasPendingCashin);
+    },
+    userCashout: (state) => {
+      return (state.pendingCashout = authStore.userData.hasPendingCashout);
     },
   },
 
@@ -60,6 +70,7 @@ export const useCashStore = defineStore("cash", {
           screenshot: this.cashinForm.screenshot,
           userRef: authStore.user.id,
           status: "pending",
+          createdAt: serverTimestamp(),
         };
         if (this.cashinForm.screenshot) {
           await addDoc(collectionRef, formData);
@@ -79,6 +90,51 @@ export const useCashStore = defineStore("cash", {
           });
         }
         this.cashinLoading = false;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    async cashout() {
+      this.cashoutLoading = true;
+      try {
+        const collectionRef = collection(db, "cashout");
+        const userRef = doc(db, "users", authStore.user.id);
+        const userSnap = await getDoc(userRef);
+        const data = userSnap.data();
+
+        const formData = {
+          amount: this.cashoutForm.amount,
+          channel: this.cashoutForm.channel,
+          receiver: this.cashoutForm.receiver,
+          balance: `${data.balance}`,
+          sender:
+            this.cashoutForm.channel == "Gcash"
+              ? this.gcashMobile
+              : this.mayaMobile,
+          userRef: authStore.user.id,
+          status: "pending",
+          createdAt: serverTimestamp(),
+        };
+
+        if (data.balance >= this.cashoutForm.amount) {
+          await addDoc(collectionRef);
+          await updateDoc(userRef, {
+            hasPendingCashout: true,
+          });
+          Notify.create({
+            color: "positive",
+            message: "Cashout requested successfully, please wait for approval",
+          });
+        } else {
+          Notify.create({
+            color: "negative",
+            message:
+              "You do not have enough balance to create this transaction",
+            position: "top",
+          });
+        }
+        this.cashoutLoading = false;
       } catch (error) {
         console.error(error);
       }

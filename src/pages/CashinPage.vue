@@ -2,7 +2,7 @@
   <q-page>
     <div v-show="pendingCashin" class="justify-center text-warning">
       <div class="row justify-center text-center text-warning text-h4">
-        Your requested amount is being processed, waiting for approval!
+        Your requested deposit amount is being processed, waiting for approval!
       </div>
       <div class="row justify-center q-pa-md">
         <q-spinner-puff size="5.5em" />
@@ -226,13 +226,9 @@ function nextBtn($refs) {
   }
 }
 
-function finishBtn() {
-  console.log("This is finish");
-}
-
 onMounted(() => {
   realTimeUser();
-  console.log("pending", userCashin.value);
+  userCashin.value;
 });
 
 onBeforeUnmount(() => {
