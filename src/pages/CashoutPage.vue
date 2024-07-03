@@ -16,14 +16,14 @@
 
     <div v-else v-show="!pendingCashout" class="q-pa-md text-warning">
       <q-card class="bg-primary"
-        ><q-card-section>
+        ><q-card-section class="bg-grey text-dark">
           <div class="col text-center text-bold">
             Request Cashout
           </div></q-card-section
         >
         <q-separator />
         <q-card-section>
-          <div class="q-pa-md">
+          <div class="qs-pa-md">
             <div class="text-bold text-overline">Send thru:</div>
             <div class="row">
               <q-btn-toggle
@@ -43,6 +43,7 @@
             <div class="text-bold text-overline">Select amount:</div>
             <div class="row">
               <q-btn-toggle
+                flat
                 toggle-color="secondary"
                 v-model="cashoutForm.amount"
                 :options="[
@@ -54,6 +55,7 @@
                 ]"
               />
               <q-btn-toggle
+                flat
                 toggle-color="secondary"
                 v-model="cashoutForm.amount"
                 :options="[
@@ -69,6 +71,7 @@
           <q-separator />
           <div class="col q-gutter-md">
             <q-input
+              bg-color="warning"
               class="text-warning"
               filled
               placeholder="Enter amount"
@@ -76,6 +79,7 @@
               v-model="cashoutForm.amount"
             />
             <q-input
+              bg-color="warning"
               class="text-warning"
               filled
               placeholder="Enter your mobile number"
@@ -83,10 +87,13 @@
               v-model="cashoutForm.receiver"
             />
           </div>
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
           <div class="row justify-center q-pa-md">
-            <q-btn label="withdraw" class="bg-positive" @click="cashout" />
-          </div> </q-card-section
-      ></q-card>
+            <q-btn label="withdraw" class="bg-positive" @click="cashout" /></div
+        ></q-card-section>
+      </q-card>
     </div>
   </q-page>
 </template>

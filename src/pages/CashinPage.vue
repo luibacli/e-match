@@ -30,8 +30,8 @@
         >
           <div class="q-pa-md text-warning">
             <q-card class="bg-primary"
-              ><q-card-section>
-                <div class="col text-center text-bold">
+              ><q-card-section class="bg-grey">
+                <div class="col text-center text-bold text-dark">
                   Request Cashin
                 </div></q-card-section
               >
@@ -53,10 +53,13 @@
 
                 <q-separator />
 
-                <div class="q-pa-md">
+                <div>
                   <div class="text-bold text-overline">Select amount:</div>
                   <div class="row">
                     <q-btn-toggle
+                      class="q-gutter-md"
+                      flat
+                      dense
                       toggle-color="secondary"
                       v-model="cashinForm.amount"
                       :options="[
@@ -68,6 +71,9 @@
                       ]"
                     />
                     <q-btn-toggle
+                      class="q-gutter-md"
+                      flat
+                      dense
                       toggle-color="secondary"
                       v-model="cashinForm.amount"
                       :options="[
@@ -83,6 +89,7 @@
                 <q-separator />
                 <div class="col q-gutter-md">
                   <q-input
+                    bg-color="warning"
                     class="text-warning"
                     filled
                     placeholder="Enter amount"

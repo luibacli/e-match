@@ -12,7 +12,6 @@
         <q-tabs>
           <q-tab icon="sports_esports" @click="btnPlay" />
 
-          <q-tab icon="handshake" />
           <q-tab icon="notifications"
             ><q-menu class="bg-primary" style="width: 100%"
               ><q-list v-for="match in matchAccepted" :key="match.id"

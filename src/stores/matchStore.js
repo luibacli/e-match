@@ -806,6 +806,20 @@ export const useMatchStore = defineStore("match", {
               console.log("no display name found");
             }
 
+            const counterRef = doc(db, "counters", "matchCounter");
+
+            const counterDoc = await getDoc(counterRef);
+
+            if (!counterDoc.exists) {
+              throw new Error("Counter document does not exist!");
+            }
+
+            let matchCounter = counterDoc.data().counter;
+
+            matchCounter += 1;
+
+            const newMatchId = matchCounter.toString();
+
             const docData = {
               id: `${newMatchId}`,
               host: this.host,
@@ -832,21 +846,7 @@ export const useMatchStore = defineStore("match", {
             };
             this.matchId = docData.id;
 
-            const counterRef = doc(db, "counters", "matchCounter");
-
-            const counterDoc = await getDoc(counterRef);
-
-            if (!counterDoc.exists) {
-              throw new Error("Counter document does not exist!");
-            }
-
-            let matchCounter = counterDoc.data().counter;
-
-            matchCounter += 1;
-
             await updateDoc(counterRef, { counter: matchCounter });
-
-            const newMatchId = matchCounter.toString();
 
             await setDoc(doc(db, "matches", newMatchId), docData);
             const userRef = doc(db, "users", authStore.user.id);

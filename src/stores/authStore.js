@@ -9,10 +9,15 @@ import {
 } from "firebase/auth";
 import {
   setDoc,
+  getDocs,
   doc,
   serverTimestamp,
   getDoc,
   onSnapshot,
+  query,
+  collection,
+  where,
+  or,
 } from "firebase/firestore";
 import { ref } from "vue";
 import { Notify } from "quasar";
@@ -45,19 +50,6 @@ export const useAuthStore = defineStore("auth", {
       id: "",
       name: "",
     },
-    // userData: ref({
-    //   displayName: "",
-    //   email: "",
-    //   phoneNumber: "",
-    //   password: "",
-    //   balance: 0,
-    //   wins: 0,
-    //   loss: 0,
-    //   isAdmin: false,
-    //   isHost: false,
-    //   isChallenger: false,
-    //   isAccepted: false,
-    // }),
     userData: {},
     matchAccepted: [],
     matchLength: 0,
@@ -70,6 +62,18 @@ export const useAuthStore = defineStore("auth", {
     isLogin: true,
     isAuthenticated: false,
     isLoading: false,
+    historyColumns: [
+      { name: "id", align: "center", label: "Match ID", field: "id" },
+      { name: "game", align: "center", label: "Game", field: "game" },
+      { name: "bet", align: "center", label: "Bet", field: "bet" },
+      { name: "winner", align: "center", label: "Winner", field: "winner" },
+      { name: "status", align: "center", label: "status", field: "status" },
+    ],
+    matchHistoryList: [],
+    pagination: {
+      page: 1,
+      rowsPerPage: 15,
+    },
   }),
   getters: {
     playerId: (state) => {
@@ -165,6 +169,32 @@ export const useAuthStore = defineStore("auth", {
           this.userData = data || {};
         } else {
           throw new Error("Data not found");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    async getMatchHistory() {
+      try {
+        if (this.user.id) {
+          const q = query(
+            collection(db, "matches"),
+            or(
+              where("userRef", "==", `${this.user.id}`),
+              where("challengerRef", "==", `${this.user.id}`)
+            )
+          );
+          const matchData = [];
+          const querySnapshot = await getDocs(q);
+          querySnapshot.forEach((doc) => {
+            return matchData.push(doc.data());
+          });
+
+          this.matchHistoryList = matchData;
+          console.log(this.matchHistoryList);
+        } else {
+          console.log("User ID not found");
         }
       } catch (error) {
         console.error(error);
