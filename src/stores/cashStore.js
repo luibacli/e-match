@@ -144,7 +144,7 @@ export const useCashStore = defineStore("cash", {
     async uploadFiles(files) {
       const uploadPromises = files.map((file) => this.storeImage(file));
       const downloadURLS = await Promise.all(uploadPromises);
-      console.log(downloadURLS);
+
       if (downloadURLS.length > 0) {
         this.cashinForm.screenshot = downloadURLS[0];
       }

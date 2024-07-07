@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>This is referral page</h1>
+    <h1>Referral Page is under construction</h1>
   </div>
 </template>
 

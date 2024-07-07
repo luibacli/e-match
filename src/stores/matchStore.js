@@ -17,12 +17,17 @@ import {
   FieldValue,
 } from "firebase/firestore";
 import { db } from "src/boot/firebase";
-
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "./authStore";
 
 import { Notify } from "quasar";
-import { data } from "autoprefixer";
+import { v4 as uuidv4 } from "uuid";
 const authStore = useAuthStore();
 // const { playerId, playerName } = storeToRefs(authStore);
 
@@ -70,6 +75,10 @@ export const useMatchStore = defineStore("match", {
     requestBadge: 0,
     isRequest: false,
     isJoin: false,
+    showUpload: false,
+    isPending: false,
+    hostScreenshot: "",
+    challengerScreenshot: "",
     teamData: {
       id: "",
       name: "",
@@ -117,6 +126,7 @@ export const useMatchStore = defineStore("match", {
     teamLoading: false,
     startLoading: false,
     btnDisable: false,
+    btnReadyDisable: false,
     // playerList: ref({
     //   team: "",
     //   player1: "",
@@ -507,10 +517,19 @@ export const useMatchStore = defineStore("match", {
       try {
         const docRef = doc(db, "users", this.playerId);
         const matchRef = doc(db, "matches", this.matchData.id);
-        if (this.isHost) {
+        const matchBet = Number(this.matchData.bet);
+        const playerBalance = Number(this.playerBalance);
+        const newBalance = matchBet + playerBalance;
+        if (this.isHost && this.matchData.challenger !== null) {
+          Notify.create({
+            color: "negative",
+            message: "Cannot leave the match when there is a challenger",
+          });
+        } else if (this.isHost && this.matchData.challenger == null) {
           await updateDoc(docRef, {
             isHost: false,
             currentMatchId: "",
+            balance: newBalance,
           });
           this.matchLeaveModal = false;
           this.router.push("/play");
@@ -519,6 +538,7 @@ export const useMatchStore = defineStore("match", {
             message: "You left the match and it has been deleted",
           });
         }
+
         if (this.isChallenger) {
           await updateDoc(docRef, {
             isChallenger: false,
@@ -609,10 +629,6 @@ export const useMatchStore = defineStore("match", {
         if (this.isHost) {
           if (this.challenger) {
             this.isJoin = true;
-            Notify.create({
-              color: "positive",
-              message: `${this.challenger} the challenger is now in lobby`,
-            });
           } else if (this.challenger == null) {
             Notify.create({
               color: "negative",
@@ -626,8 +642,19 @@ export const useMatchStore = defineStore("match", {
     async ready() {
       try {
         const docRef = doc(db, "matches", this.routeMatch);
+        const userRef = doc(db, "users", authStore.user.id);
+        const docSnap = await getDoc(docRef);
+        const data = docSnap.data();
+        const currentBet = Number(data.bet);
+        const currentTotalBet = Number(data.totalBet);
+        const playerBet = Number(this.playerBalance);
+        const newBet = currentTotalBet + currentBet;
+        await updateDoc(userRef, {
+          balance: playerBet - currentBet,
+        });
         await updateDoc(docRef, {
           challengerReady: true,
+          totalBet: newBet,
         });
       } catch (error) {
         console.log(error);
@@ -637,10 +664,19 @@ export const useMatchStore = defineStore("match", {
     async notReady() {
       try {
         const docRef = doc(db, "matches", this.routeMatch);
+        const userRef = doc(db, "users", authStore.user.id);
+        const playerBalance = Number(this.playerBalance);
+        const currentBet = Number(this.matchData.bet);
+        const currentTotalBet = Number(this.matchData.totalBet);
+        const newBet = currentTotalBet - currentBet;
+        const returnBet = playerBalance + currentBet;
 
+        await updateDoc(userRef, {
+          balance: returnBet,
+        });
         await updateDoc(docRef, {
           challengerReady: false,
-          challenger: "",
+          totalBet: newBet,
         });
       } catch (error) {
         console.log(error);
@@ -651,16 +687,131 @@ export const useMatchStore = defineStore("match", {
       this.startLoading = true;
       try {
         const docRef = doc(db, "matches", this.routeMatch);
-
-        await updateDoc(docRef, {
-          isStart: true,
-        });
-
-        // this.btnDisable = true;
-        this.startLoading = false;
+        const docSnap = await getDoc(docRef);
+        const data = docSnap.data();
+        if (data.challengerReady == false) {
+          Notify.create({
+            color: "negative",
+            message:
+              "Please wait for a challenger or the challenger to be ready",
+          });
+        } else {
+          await updateDoc(docRef, {
+            isStart: true,
+          });
+          this.showUpload = true;
+          this.btnDisable = true;
+          this.startLoading = false;
+        }
       } catch (error) {
         console.log(error);
       }
+    },
+
+    async submitProof() {
+      try {
+        const docRef = doc(db, "matches", this.routeMatch);
+        const userRef = doc(db, "users", authStore.user.id);
+        if (this.isHost) {
+          await updateDoc(docRef, {
+            hostProof: this.hostScreenshot,
+            status: "Pending",
+          });
+
+          await updateDoc(userRef, {
+            hasPendingMatch: true,
+          });
+          this.showUpload = false;
+          Notify.create({
+            color: "positive",
+            message:
+              "Uploaded sucessfully, our team is now evaluating your match please wait for a moment, you can check the match status at your profile match history",
+            position: "top",
+          });
+          this.router.push("/play");
+        }
+        if (this.isChallenger) {
+          await updateDoc(docRef, {
+            challengerProof: this.challengerScreenshot,
+            status: "Pending",
+          });
+          await updateDoc(userRef, {
+            hasPendingMatch: true,
+          });
+          this.showUpload = false;
+          Notify.create({
+            color: "positive",
+            message:
+              "Uploaded sucessfully, our team is now evaluating your match please wait for a moment, you can check the match status at your profile match history",
+            position: "top",
+          });
+          this.router.push("/play");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    async uploadFiles(files) {
+      const uploadPromises = files.map((file) => this.storeImage(file));
+      const downloadURLS = await Promise.all(uploadPromises);
+
+      if (downloadURLS.length > 0 && this.isHost) {
+        this.hostScreenshot = downloadURLS[0];
+      }
+
+      if (downloadURLS.length > 0 && this.isChallenger) {
+        this.challengerScreenshot = downloadURLS[0];
+      }
+    },
+
+    async storeImage(image) {
+      return new Promise((resolve, reject) => {
+        const storage = getStorage();
+        const fileName = `${authStore.user.id}-${image.name}-${uuidv4()}`;
+        const storageRef = ref(storage, "match/" + fileName);
+
+        const uploadTask = uploadBytesResumable(storageRef, image);
+
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            Notify.create({
+              color: "positive",
+              message: `Upload is ${progress} done`,
+            });
+            switch (snapshot.state) {
+              case "paused":
+                Notify.create({
+                  color: "negative",
+                  message: "Upload is paused",
+                });
+                break;
+              case "running":
+                Notify.create({
+                  color: "blue",
+                  message: "Upload is running",
+                });
+                break;
+            }
+          },
+          (error) => {
+            reject(error);
+          },
+          () => {
+            // Ensure getDownloadURL is called after upload completes
+            getDownloadURL(uploadTask.snapshot.ref)
+              .then((downloadURL) => {
+                resolve(downloadURL);
+              })
+              .catch((error) => {
+                reject(error);
+              });
+          }
+        );
+      });
     },
 
     async loadTeams() {
@@ -835,7 +986,7 @@ export const useMatchStore = defineStore("match", {
               challengers: [],
               challengerReady: false,
               isStart: false,
-              totalBet: 0,
+              totalBet: this.match.bet,
               gameLobbyHosts: [],
               gameLobbyChallengers: [],
               requests: [],
@@ -849,10 +1000,15 @@ export const useMatchStore = defineStore("match", {
             await updateDoc(counterRef, { counter: matchCounter });
 
             await setDoc(doc(db, "matches", newMatchId), docData);
+
             const userRef = doc(db, "users", authStore.user.id);
+            const currentBet = Number(this.match.bet);
+            const playerBalance = Number(this.playerBalance);
+            const newBalance = playerBalance - currentBet;
             await updateDoc(userRef, {
               isHost: true,
               currentMatchId: `${newMatchId}`,
+              balance: newBalance,
             });
             this.router.push(`/play/${this.matchId}`);
 
@@ -899,6 +1055,14 @@ export const useMatchStore = defineStore("match", {
     },
     openChallengeRequestsModal() {
       this.challengeRequestsModal = true;
+    },
+    openUploader() {
+      this.showUpload = true;
+    },
+    watchMatchStatus() {
+      if (this.matchData.status == "Pending") {
+        this.isPending = true;
+      }
     },
     async openTeamUpdateModal(id) {
       this.teamId = id;

@@ -63,12 +63,6 @@
                   <q-item-label>Logout</q-item-label>
                 </q-item-section>
               </q-item>
-
-              <q-item clickable v-close-popup @click="onItemClick">
-                <q-item-section>
-                  <q-item-label>Articles</q-item-label>
-                </q-item-section>
-              </q-item>
             </q-list></q-btn-dropdown
           >
         </q-tabs>
@@ -169,13 +163,13 @@ const linksList = [
     link: "profile",
   },
   {
-    title: "Cashin",
+    title: "Deposit",
 
     icon: "add_card",
     link: "cashin",
   },
   {
-    title: "Cashout",
+    title: "Withdraw",
 
     icon: "shopping_cart_checkout",
     link: "cashout",

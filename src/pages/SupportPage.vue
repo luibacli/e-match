@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>This is customer support</h1>
+    <h1>Customer support page is under construction</h1>
   </div>
 </template>
 
