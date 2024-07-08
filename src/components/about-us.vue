@@ -18,11 +18,14 @@
       </div>
     </q-parallax>
   </div>
-  <div class="q-pa-lg text-warning row text-left">
-    <div class="text-h5 text-bold q-mt-lg">
-      Compete Anytime: Join E-Match's Daily, Weekly, and Seasonal Tournaments!
+  <div class="q-pa-lg row text-left text-warning">
+    <div class="text-h5 text-bold q-mt-lg bg-primary rounded-borders q-pa-md">
+      <span class="text-positive">Compete Anytime</span> : Join E-Match's Daily,
+      Weekly, and Seasonal Tournaments!
     </div>
-    <div class="text-h7 q-mt-lg q-mb-lg">
+    <div
+      class="text-subtitle1 q-mt-lg q-mb-lg bg-primary rounded-borders q-pa-md"
+    >
       Join E-Match and dive into our exciting daily, weekly, and seasonal
       tournaments! Whether you are looking for quick daily challenges,
       competitive weekly battles, or intense seasonal leagues, E-Match has
@@ -31,19 +34,33 @@
       Do not miss out on the action—register now and become part of the E-Match
       tournament excitement!
     </div>
-    <div class="text-h5 text-bold q-mt-lg">
-      Elevate Your E-Sports Tournaments: Partner with E-Match! Create and Host
-      Your Own Tournament
+    <div class="text-h5 text-bold q-mt-lg bg-primary rounded-borders q-pa-md">
+      <span class="text-red">Scammer </span> No More!
     </div>
-    <div class="text-h7 q-mt-md">
-      Partner with E-Match to create and host your own e-sports tournaments
-      using our cutting-edge platform. Our user-friendly interface and robust
-      features make it easy to organize and manage tournaments, ensuring a
-      seamless experience for both organizers and participants. Whether you're a
-      gaming community, a brand, or an event organizer, collaborating with
-      E-Match allows you to reach a broader audience, engage players with
-      exciting competitions, and elevate your event's profile. Join forces with
-      us and take your e-sports tournaments to the next level!
+    <div class="text-subtitle1 q-mt-md q-pa-md bg-primary">
+      In today's digital landscape, the risk of encountering scammers,
+      especially among third-party individuals often referred to as "middlemen,"
+      has become alarmingly prevalent. These intermediaries, who may present
+      themselves as trusted go-betweens, have increasingly exploited the trust
+      of unsuspecting users, leading to significant financial and emotional
+      losses. <br />
+    </div>
+
+    <div class="text-subtitle1 q-mt-md q-pa-md bg-primary">
+      Recognizing this growing concern, we are proud to introduce our app,
+      designed with the primary aim of preventing scams and ensuring a secure
+      environment for our users. Our platform eliminates the need for unreliable
+      third parties, providing a safe and transparent space for transactions and
+      interactions. By leveraging advanced security measures, robust
+      verification processes, and real-time monitoring, we protect our community
+      from potential fraud and build trust among users.
+    </div>
+
+    <div class="text-subtitle1 q-mt-md q-pa-md bg-primary">
+      With our app, you can engage in transactions with confidence, knowing that
+      your interactions are safeguarded against scams. Say goodbye to the fear
+      of being duped by dishonest middlemen. Welcome to a new era of secure,
+      scam-free digital transactions.
     </div>
   </div>
   <div class="q-pa-none text-warning">
