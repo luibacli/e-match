@@ -4,12 +4,12 @@ A dynamic app where gamers can compete various e-sports tournaments. Players cha
 
 For the demo, try logging these two accounts with separate browser:
 Account 1:
-luigie@gmail.com
-test1234
+email: luigie@gmail.com
+password: test1234
 
 Account 2:
-geralt@gmail.com
-test1234
+email: geralt@gmail.com
+password: test1234
 
 ## Install the dependencies
 ```bash
