@@ -2,6 +2,15 @@
 
 A dynamic app where gamers can compete various e-sports tournaments. Players challenge each other in popular games, track their rankings, and win rewards.
 
+For the demo, try logging these two accounts with separate browser:
+Account 1:
+luigie@gmail.com
+test1234
+
+Account 2:
+geralt@gmail.com
+test1234
+
 ## Install the dependencies
 ```bash
 yarn
