@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <div v-show="userData.hasPendingMatch" class="justify-center text-warning">
+    <div v-if="userData.hasPendingMatch" class="justify-center text-warning">
       <div class="row justify-center text-center text-warning text-h4">
         Our team is currently evaluating your match, please wait for a moment!
       </div>
@@ -9,7 +9,16 @@
       </div>
     </div>
 
-    <div v-show="!userData.hasPendingMatch">
+    <div
+      v-if="matchData.status == 'Closed'"
+      class="justify-center text-warning"
+    >
+      <div class="row justify-center text-center text-warning text-h4">
+        This match is now closed, thanks for waiting!
+      </div>
+    </div>
+
+    <div v-if="userData.showMatch">
       <div class="row justify-center">
         <div
           class="q-mb-md q-pa-sm bg-warning rounded-borders"
@@ -33,7 +42,7 @@
           style="width: 100%; max-width: 1000px"
         >
           <div class="row bg-secondary text-warning">
-            <div v-show="isHost" class="col text-yellow">
+            <div v-if="isHost" class="col text-yellow">
               <q-btn
                 flat
                 dense
@@ -44,12 +53,12 @@
                 ><span class="text-yellow"
                   ><q-icon name="notifications"
                 /></span>
-                <q-badge v-show="isRequest" color="red" floating
+                <q-badge v-if="isRequest" color="red" floating
                   >{{ requestBadge }}
                 </q-badge>
               </q-btn>
             </div>
-            <div v-show="matchData.challengerReady" class="col text-right">
+            <div v-if="matchData.challengerReady" class="col text-right">
               <span class="text-red">{{ matchData.challenger }}</span>
               is now ready!
 
@@ -77,7 +86,7 @@
             </q-card-section>
           </q-card-section>
           <div
-            v-show="matchData.isStart"
+            v-if="matchData.isStart"
             class="row justify-center text-h6 text-bold text-secondary bg-secondary text-warning"
           >
             <q-spinner-gears color="blue" size="1.5em" v-if="startLoading" />
@@ -155,26 +164,26 @@
               @click="openLeaveModal"
             />
             <q-btn
-              v-show="matchData.isStart"
+              v-if="matchData.isStart"
               label="Upload Proof"
               class="bg-blue text-warning"
               @click="openUploader"
             />
             <q-btn
-              v-show="isHost"
+              v-if="isHost"
               label="Start!"
               class="bg-positive text-warning"
               :disable="matchData.isStart"
               @click="startMatch"
             />
             <q-btn
-              v-show="isChallenger && !matchData.challengerReady"
+              v-if="isChallenger && !matchData.challengerReady"
               label="Ready!"
               class="bg-positive text-warning"
               @click="ready"
             />
             <q-btn
-              v-show="isChallenger && matchData.challengerReady"
+              v-if="isChallenger && matchData.challengerReady"
               label="Cancel"
               :disable="matchData.isStart"
               class="bg-blue text-warning"
@@ -441,7 +450,7 @@
       ></q-dialog>
 
       <!-- Upload Proof Dialog -->
-      <q-dialog v-model="showUpload"
+      <q-dialog v-model="showUploadDialog"
         ><q-card class="bg-primary"
           ><q-card-section
             ><div class="text-subtitle1 text-warning">
@@ -501,6 +510,7 @@ const {
   isChallenger,
   isRequest,
   showUpload,
+  showUploadDialog,
   isJoin,
   isPending,
   requestBadge,
@@ -530,6 +540,7 @@ const {
   openUploader,
   submitProof,
   watchMatchStatus,
+  goBackPlay,
 } = matchStore;
 
 const teams = teamList;
@@ -554,14 +565,19 @@ watch(challenger, (newVal, oldVal) => {
   }
 });
 
-watch(
-  () => matchData.status,
-  (newStatus) => {
-    if (newStatus == "Closed") {
-      router.push("/play");
-    }
+// watch(
+//   () => matchData.status,
+//   (newStatus) => {
+//     if (newStatus == "Closed") {
+//       router.push("/play");
+//     }
+//   }
+// );
+watch(matchData.status, (newVal, oldVal) => {
+  if (newVal == "Closed") {
+    goBackPlay();
   }
-);
+});
 onBeforeUnmount(() => {
   unsubscribeRealTimeMatch();
   unsubscribeRealTimeUser();

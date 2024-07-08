@@ -76,6 +76,7 @@ export const useMatchStore = defineStore("match", {
     isRequest: false,
     isJoin: false,
     showUpload: false,
+    showUploadDialog: false,
     isPending: false,
     hostScreenshot: "",
     challengerScreenshot: "",
@@ -495,6 +496,7 @@ export const useMatchStore = defineStore("match", {
         if (accepted) {
           await updateDoc(userRef, {
             isChallenger: true,
+            showMatch: true,
             matchAccepted: arrayRemove(objectToRemove),
             currentMatchId: matchId,
           });
@@ -647,10 +649,11 @@ export const useMatchStore = defineStore("match", {
         const data = docSnap.data();
         const currentBet = Number(data.bet);
         const currentTotalBet = Number(data.totalBet);
-        const playerBet = Number(this.playerBalance);
+        const playerBalance = Number(this.playerBalance);
         const newBet = currentTotalBet + currentBet;
+        const newBalance = playerBalance - currentBet;
         await updateDoc(userRef, {
-          balance: playerBet - currentBet,
+          balance: newBalance,
         });
         await updateDoc(docRef, {
           challengerReady: true,
@@ -720,6 +723,7 @@ export const useMatchStore = defineStore("match", {
 
           await updateDoc(userRef, {
             hasPendingMatch: true,
+            showMatch: false,
           });
           this.showUpload = false;
           Notify.create({
@@ -737,6 +741,7 @@ export const useMatchStore = defineStore("match", {
           });
           await updateDoc(userRef, {
             hasPendingMatch: true,
+            showMatch: false,
           });
           this.showUpload = false;
           Notify.create({
@@ -1009,6 +1014,7 @@ export const useMatchStore = defineStore("match", {
               isHost: true,
               currentMatchId: `${newMatchId}`,
               balance: newBalance,
+              showMatch: true,
             });
             this.router.push(`/play/${this.matchId}`);
 
@@ -1057,7 +1063,7 @@ export const useMatchStore = defineStore("match", {
       this.challengeRequestsModal = true;
     },
     openUploader() {
-      this.showUpload = true;
+      this.showUploadDialog = true;
     },
     watchMatchStatus() {
       if (this.matchData.status == "Pending") {
@@ -1081,6 +1087,11 @@ export const useMatchStore = defineStore("match", {
     openTeamDeleteModal(id) {
       this.teamId = id;
       this.teamDeleteModal = true;
+    },
+    goBackPlay() {
+      if (this.matchData.status == "Closed") {
+        this.router.push("/play");
+      }
     },
 
     async openChallengeModal(id, host) {
