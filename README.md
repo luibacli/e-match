@@ -20,6 +20,12 @@ Account 2:
 email: geralt@gmail.com
 password: test1234
 
+## Technologies Used
+
+- **Frontend**: Vue.js, Quasar Framework,
+- **Backend**: Firebase (Firestore, Authentication, Storage)
+- **State Management**: Pinia
+
 ## Install the dependencies
 ```bash
 yarn
