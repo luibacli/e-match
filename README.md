@@ -24,7 +24,7 @@ password: test1234
 Demo site: 
 https://ematch-dashboard.vercel.app/#/
 
-Open the dashboard ang login to this account:
+- **Open the dashboard ang login to this account:
   email: admin@gmail.com
   password: admin123
   
