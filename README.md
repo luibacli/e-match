@@ -2,7 +2,7 @@
 
 A dynamic app where gamers can compete various e-sports tournaments. Players challenge each other in popular games, track their rankings, and win rewards.
 
-For the demo, try logging these two accounts with separate browser:
+## For the demo, try logging these two accounts with separate browser:
 Account 1:
 email: luigie@gmail.com
 password: test1234
