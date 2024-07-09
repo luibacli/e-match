@@ -20,6 +20,14 @@ Account 2:
 email: geralt@gmail.com
 password: test1234
 
+## After uploading screenshots, match will set to status "Pending"
+
+- **Dashboard: Open the dashboard ang login to this account:
+- Demo site: https://ematch-dashboard.vercel.app/#/
+  email: admin@gmail.com
+  password: admin123
+- **Approve winner: Go to matches, find the pending match, and confirm the winner.
+
 ## Technologies Used
 
 - **Frontend**: Vue.js, Quasar Framework,
