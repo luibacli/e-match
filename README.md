@@ -21,6 +21,7 @@ email: geralt@gmail.com
 password: test1234
 
 ## After uploading screenshots, match will set to status "Pending"
+(note: no validation logic implemented yet, you can submit without screenshot)
 Demo site: 
 https://ematch-dashboard.vercel.app/#/
 
