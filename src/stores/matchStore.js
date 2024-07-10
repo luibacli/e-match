@@ -522,16 +522,19 @@ export const useMatchStore = defineStore("match", {
         const matchBet = Number(this.matchData.bet);
         const playerBalance = Number(this.playerBalance);
         const newBalance = matchBet + playerBalance;
-        if (this.isHost && this.matchData.challenger !== null) {
+        if (this.isHost && this.matchData.challenger) {
           Notify.create({
             color: "negative",
             message: "Cannot leave the match when there is a challenger",
           });
-        } else if (this.isHost && this.matchData.challenger == null) {
+        } else if (this.isHost && !this.matchData.challenger) {
           await updateDoc(docRef, {
             isHost: false,
             currentMatchId: "",
             balance: newBalance,
+          });
+          await updateDoc(matchRef, {
+            status: "invalid",
           });
           this.matchLeaveModal = false;
           this.router.push("/play");
@@ -541,7 +544,7 @@ export const useMatchStore = defineStore("match", {
           });
         }
 
-        if (this.isChallenger) {
+        if (this.isChallenger && !this.matchData.challengerReady) {
           await updateDoc(docRef, {
             isChallenger: false,
             currentMatchId: "",
@@ -559,6 +562,11 @@ export const useMatchStore = defineStore("match", {
           Notify.create({
             color: "positive",
             message: "You left the match",
+          });
+        } else if (this.isChallenger && this.matchData.challengerReady) {
+          Notify.create({
+            color: "negative",
+            message: "You cannot leave the match when you are ready",
           });
         }
       } catch (error) {
@@ -712,6 +720,7 @@ export const useMatchStore = defineStore("match", {
     },
 
     async submitProof() {
+      this.showUploadDialog = false;
       try {
         const docRef = doc(db, "matches", this.routeMatch);
         const userRef = doc(db, "users", authStore.user.id);
@@ -750,6 +759,7 @@ export const useMatchStore = defineStore("match", {
               "Uploaded sucessfully, our team is now evaluating your match please wait for a moment, you can check the match status at your profile match history",
             position: "top",
           });
+          this.showUploadDialog = false;
           this.router.push("/play");
         }
       } catch (error) {
