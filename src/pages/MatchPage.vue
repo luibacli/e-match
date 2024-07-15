@@ -1,5 +1,6 @@
 <template>
-  <q-page>
+  <div v-if="pageLoading"></div>
+  <q-page v-else>
     <div v-if="userData.hasPendingMatch" class="justify-center text-warning">
       <div class="row justify-center text-center text-warning text-h4">
         Our team is currently evaluating your match, please wait for a moment!
@@ -551,7 +552,26 @@ const {
 const teams = teamList;
 const requests = requestList;
 
+const pageLoading = ref(false);
+let timer;
+
+function showLoading() {
+  pageLoading.value = true;
+  $q.loading.show({
+    spinner: QSpinnerPuff,
+    spinnerColor: "warning",
+    spinnerSize: 140,
+    backgroundColor: "indigo",
+  });
+  timer = setTimeout(() => {
+    pageLoading.value = false;
+    $q.loading.hide();
+    timer = void 0;
+  }, 1000);
+}
+
 onMounted(() => {
+  showLoading();
   loadTeams();
   realTimeMatch();
   realTimeUser();
@@ -584,6 +604,10 @@ watch(matchData.status, (newVal, oldVal) => {
   }
 });
 onBeforeUnmount(() => {
+  if (timer !== void 0) {
+    clearTimeout(timer);
+    $q.loading.hide();
+  }
   unsubscribeRealTimeMatch();
   unsubscribeRealTimeUser();
 });
