@@ -94,7 +94,7 @@
           </div>
           <q-card-section class="bg-primary text-warning"
             ><div class="row q-gutter-md">
-              <div class="col">
+              <div v-show="matchData.type == 'TvsT'" class="col">
                 <q-btn
                   flat
                   dense
@@ -203,7 +203,12 @@
           <q-spinner-puff color="warning" size="4em" />
         </div>
         <div v-else class="row q-pa-sm text-warning">
-          <div class="row q-pa-sm" v-for="team in teams" :key="team.id">
+          <div
+            v-show="matchData.type == 'TvsT'"
+            class="row q-pa-sm"
+            v-for="team in teams"
+            :key="team.id"
+          >
             <q-card class="bg-primary" style="width: 100%; max-width: 300px">
               <q-card-section
                 ><div class="row text-bold">
